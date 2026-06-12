@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { songs, CATEGORIES } from '../../data/songs';
+import { songs } from '../../data/songs';
 
 /**
  * JiuYinGe — 九因歌 (song index) page.
@@ -154,6 +154,8 @@ const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
                   <button
                     key={song.id}
                     onClick={() => onSongClick(song.id)}
+                    onMouseDown={e => e.stopPropagation()}
+                    onTouchStart={e => { e.stopPropagation(); onSongClick(song.id); }}
                     title={song.title}
                     style={{
                       writingMode: 'vertical-rl',

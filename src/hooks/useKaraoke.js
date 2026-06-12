@@ -2,150 +2,155 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { buildLineIndex } from '../data/songs';
 
 /**
- * useKaraoke
+ * useKaraoke — singleton-per-song pattern.
  *
- * Drives karaoke sync using YouTube IFrame API.
- * - Loads the YT IFrame API script once (singleton guard)
- * - Polls getCurrentTime() at ~60ms for active-line tracking
- * - Returns { activeLineKey, playState, position, duration, toggle, seek }
+ * Multiple LyricPages for the same song share ONE YouTube player via the
+ * module-level `songPlayers` map. The player is created on first subscriber
+ * and destroyed when the last subscriber unmounts.
  *
- * activeLineKey format: `${song.id}-p${pageIdx}-l${lineIdx}`
- * This matches the key format used in LyricPage.
- *
- * Line→page mapping is derived from buildLineIndex so the BookLayout
- * can auto-flip when the active line crosses a page boundary.
+ * Returns { activeLineKey, playState, position, duration, toggle, seek }
  */
 
-let ytApiReady = false;
-let ytApiLoading = false;
+// ── YouTube IFrame API bootstrap ──────────────────────────────────────────
+
+let ytApiState = 'idle'; // 'idle' | 'loading' | 'ready'
 const ytReadyCallbacks = [];
 
 function loadYTApi() {
-  if (ytApiReady || ytApiLoading) return;
-  ytApiLoading = true;
+  if (ytApiState !== 'idle') return;
+  ytApiState = 'loading';
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
   document.head.appendChild(tag);
   window.onYouTubeIframeAPIReady = () => {
-    ytApiReady = true;
-    ytApiLoading = false;
-    ytReadyCallbacks.forEach(cb => cb());
-    ytReadyCallbacks.length = 0;
+    ytApiState = 'ready';
+    ytReadyCallbacks.splice(0).forEach(cb => cb());
   };
 }
 
 function onYTReady(cb) {
-  if (ytApiReady) { cb(); return; }
+  if (ytApiState === 'ready') { cb(); return; }
   ytReadyCallbacks.push(cb);
   loadYTApi();
 }
 
-export function useKaraoke(song) {
-  const playerRef    = useRef(null);
-  const containerRef = useRef(null);
-  const rafRef       = useRef(null);
-  const lineIndex    = useRef(buildLineIndex(song));
+// ── Singleton player store ────────────────────────────────────────────────
+// songId → { player, container, rafId, subscribers: Set<setState> }
 
-  const [playState,     setPlayState]     = useState('paused');
-  const [position,      setPosition]      = useState(0);
-  const [duration,      setDuration]      = useState(0);
-  const [activeLineKey, setActiveLineKey] = useState(null);
+const songPlayers = {};
 
-  // Mount hidden YT player ─────────────────────────────────────────────────
-  useEffect(() => {
-    // Create a hidden container
-    const el = document.createElement('div');
-    el.id = `yt-player-${song.id}`;
-    el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
-    document.body.appendChild(el);
-    containerRef.current = el;
+function broadcast(songId, patch) {
+  const entry = songPlayers[songId];
+  if (!entry) return;
+  entry.subscribers.forEach(setState => setState(prev => ({ ...prev, ...patch })));
+}
 
-    onYTReady(() => {
-      if (playerRef.current) return;
-      playerRef.current = new window.YT.Player(el.id, {
-        videoId: song.youtubeId,
-        playerVars: { autoplay: 0, controls: 0, rel: 0 },
-        events: {
-          onReady: (e) => {
-            setDuration(e.target.getDuration());
-          },
-          onStateChange: (e) => {
-            const s = e.data;
-            if (s === window.YT.PlayerState.PLAYING) {
-              setPlayState('playing');
-              startPoll();
-            } else if (s === window.YT.PlayerState.PAUSED || s === window.YT.PlayerState.ENDED) {
-              setPlayState('paused');
-              stopPoll();
-            }
-          },
+function startPoll(songId, lineIndex) {
+  const entry = songPlayers[songId];
+  if (!entry || entry.rafId) return;
+
+  function tick() {
+    const e = songPlayers[songId];
+    if (!e?.player?.getCurrentTime) return;
+    const t = e.player.getCurrentTime();
+    // Find last timed line whose time ≤ t
+    let active = null;
+    for (let i = lineIndex.length - 1; i >= 0; i--) {
+      if (lineIndex[i].time <= t) { active = lineIndex[i]; break; }
+    }
+    const key = active
+      ? `${songId}-p${active.pageIdx}-l${active.lineIdx}`
+      : null;
+    broadcast(songId, { position: t, activeLineKey: key });
+    e.rafId = requestAnimationFrame(tick);
+  }
+  entry.rafId = requestAnimationFrame(tick);
+}
+
+function stopPoll(songId) {
+  const entry = songPlayers[songId];
+  if (!entry) return;
+  if (entry.rafId) { cancelAnimationFrame(entry.rafId); entry.rafId = null; }
+}
+
+function createPlayer(song, lineIndex) {
+  const el = document.createElement('div');
+  el.id = `yt-${song.id}`;
+  el.style.cssText =
+    'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
+  document.body.appendChild(el);
+
+  const entry = songPlayers[song.id];
+  entry.container = el;
+
+  onYTReady(() => {
+    if (!songPlayers[song.id]) return; // might have been removed
+    songPlayers[song.id].player = new window.YT.Player(el.id, {
+      videoId: song.youtubeId,
+      playerVars: { autoplay: 0, controls: 0, rel: 0, origin: window.location.origin },
+      events: {
+        onReady(e) {
+          broadcast(song.id, { duration: e.target.getDuration() });
         },
-      });
+        onStateChange(e) {
+          const YT = window.YT.PlayerState;
+          if (e.data === YT.PLAYING) {
+            broadcast(song.id, { playState: 'playing' });
+            startPoll(song.id, lineIndex);
+          } else if (e.data === YT.PAUSED || e.data === YT.ENDED) {
+            broadcast(song.id, { playState: 'paused' });
+            stopPoll(song.id);
+          }
+        },
+      },
     });
+  });
+}
+
+// ── Hook ─────────────────────────────────────────────────────────────────
+
+const DEFAULT_STATE = { activeLineKey: null, playState: 'paused', position: 0, duration: 0 };
+
+export function useKaraoke(song) {
+  const [state, setState] = useState(DEFAULT_STATE);
+  const lineIndex = useRef(buildLineIndex(song)).current;
+
+  useEffect(() => {
+    const id = song.id;
+
+    if (!songPlayers[id]) {
+      songPlayers[id] = { player: null, container: null, rafId: null, subscribers: new Set() };
+      createPlayer(song, lineIndex);
+    }
+    songPlayers[id].subscribers.add(setState);
 
     return () => {
-      stopPoll();
-      if (playerRef.current) {
-        try { playerRef.current.destroy(); } catch (_) {}
-        playerRef.current = null;
-      }
-      if (containerRef.current) {
-        document.body.removeChild(containerRef.current);
-        containerRef.current = null;
+      const entry = songPlayers[id];
+      if (!entry) return;
+      entry.subscribers.delete(setState);
+      if (entry.subscribers.size === 0) {
+        stopPoll(id);
+        try { entry.player?.destroy(); } catch (_) {}
+        if (entry.container) document.body.removeChild(entry.container);
+        delete songPlayers[id];
       }
     };
   }, [song.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Polling loop ─────────────────────────────────────────────────────────
-  const startPoll = useCallback(() => {
-    function tick() {
-      const player = playerRef.current;
-      if (!player?.getCurrentTime) return;
-      const t = player.getCurrentTime();
-      setPosition(t);
-      updateActiveLine(t);
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const stopPoll = useCallback(() => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-  }, []);
-
-  function updateActiveLine(t) {
-    const lines = lineIndex.current;
-    // Find last line whose time ≤ t
-    let active = null;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      if (lines[i].time <= t) { active = lines[i]; break; }
-    }
-    if (!active) { setActiveLineKey(null); return; }
-    const key = `${song.id}-p${active.pageIdx}-l${active.lineIdx}`;
-    setActiveLineKey(key);
-  }
-
-  // Controls ─────────────────────────────────────────────────────────────
   const toggle = useCallback(() => {
-    const p = playerRef.current;
+    const p = songPlayers[song.id]?.player;
     if (!p) return;
-    const state = p.getPlayerState();
-    if (state === window.YT?.PlayerState?.PLAYING) {
-      p.pauseVideo();
-    } else {
-      p.playVideo();
-    }
-  }, []);
+    const s = p.getPlayerState();
+    if (s === window.YT?.PlayerState?.PLAYING) p.pauseVideo();
+    else p.playVideo();
+  }, [song.id]);
 
   const seek = useCallback((seconds) => {
-    const p = playerRef.current;
+    const p = songPlayers[song.id]?.player;
     if (!p) return;
     p.seekTo(seconds, true);
-    setPosition(seconds);
-  }, []);
+    broadcast(song.id, { position: seconds });
+  }, [song.id]);
 
-  return { activeLineKey, playState, position, duration, toggle, seek };
+  return { ...state, toggle, seek };
 }
