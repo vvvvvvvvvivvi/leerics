@@ -35,7 +35,7 @@ function onYTReady(cb) {
 }
 
 // ── Singleton player store ────────────────────────────────────────────────
-// songId → { player, container, rafId, subscribers: Set<setState> }
+// songId → { player, container, rafId, lastPageIdx, subscribers: Set<setState> }
 
 const songPlayers = {};
 
@@ -61,6 +61,15 @@ function startPoll(songId, lineIndex) {
     const key = active
       ? `${songId}-p${active.pageIdx}-l${active.lineIdx}`
       : null;
+
+    // Emit page-change event when active line crosses to a different page
+    if (active && active.pageIdx !== e.lastPageIdx) {
+      e.lastPageIdx = active.pageIdx;
+      window.dispatchEvent(new CustomEvent('karaoke-page-change', {
+        detail: { songId, pageIdx: active.pageIdx },
+      }));
+    }
+
     broadcast(songId, { position: t, activeLineKey: key });
     e.rafId = requestAnimationFrame(tick);
   }
@@ -119,7 +128,7 @@ export function useKaraoke(song) {
     const id = song.id;
 
     if (!songPlayers[id]) {
-      songPlayers[id] = { player: null, container: null, rafId: null, subscribers: new Set() };
+      songPlayers[id] = { player: null, container: null, rafId: null, lastPageIdx: -1, subscribers: new Set() };
       createPlayer(song, lineIndex);
     }
     songPlayers[id].subscribers.add(setState);

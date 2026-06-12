@@ -9,7 +9,7 @@ import LyricPage from './LyricPage';
  * or subsequent pages (just ruled paper + lyrics).
  */
 const SongSpread = forwardRef(function SongSpread(
-  { song, pageIndex, totalPages, absolutePageNum, activeSongId, isLeft },
+  { song, pageIndex, totalPages, absolutePageNum, compact },
   ref
 ) {
   return (
@@ -20,6 +20,7 @@ const SongSpread = forwardRef(function SongSpread(
       totalPages={totalPages}
       absolutePageNum={absolutePageNum}
       showHeader={pageIndex === 0}
+      compact={!!compact}
     />
   );
 });

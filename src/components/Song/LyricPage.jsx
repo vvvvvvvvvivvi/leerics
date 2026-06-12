@@ -4,33 +4,22 @@ import { useKaraoke } from '../../hooks/useKaraoke';
 
 const MARGIN = 32; // px — red margin rule from left edge
 
-/**
- * LyricPage — one exercise-book page, editorial quality.
- *
- * Header block (first page only):
- *   ─── thin red rule ───────────────────────────────── [YouTube]
- *   原曲 · originalTitle  /  原唱 · originalArtist
- *   TITLE  subtitle
- *   ─── page rule ───────────────────────────────────
- *
- * Section labels: crimson chip with a short preceding rule
- * Lyrics: 18px / 38px grid, left of margin rule
- * Running song title: top of every continuation page
- */
 const LyricPage = forwardRef(function LyricPage(
-  { song, pageIndex, totalPages, absolutePageNum, showHeader },
+  { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
   ref
 ) {
   const { activeLineKey, playState, position, duration, toggle, seek } =
     useKaraoke(song);
 
+  const RHYTHM    = compact ? 32 : 38;
+  const FONT_SIZE = compact ? 16 : 17;
+
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
 
-  // Determine active line index within this page for sung/upcoming logic
-  const activeLinkOnThisPage = lines.findIndex((_, li) => {
-    return `${song.id}-p${pageIndex}-l${li}` === activeLineKey;
-  });
+  const activeLinkOnThisPage = lines.findIndex((_, li) =>
+    `${song.id}-p${pageIndex}-l${li}` === activeLineKey
+  );
 
   const ytUrl = song.youtubeUrl ?? `https://www.youtube.com/watch?v=${song.youtubeId}`;
 
@@ -44,7 +33,7 @@ const LyricPage = forwardRef(function LyricPage(
           linear-gradient(#E7E3C0 1px, transparent 1px),
           linear-gradient(90deg, transparent ${MARGIN}px, #E8A0A0 ${MARGIN}px, #E8A0A0 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)
         `,
-        backgroundSize: '100% 38px, 100% 100%',
+        backgroundSize: `100% ${RHYTHM}px, 100% 100%`,
         border: '2px solid #C9C284',
         fontFamily: 'var(--font-wenkai)',
       }}
@@ -60,13 +49,10 @@ const LyricPage = forwardRef(function LyricPage(
 
         {/* ── First-page header ─────────────────────────────────── */}
         {showHeader ? (
-          <div style={{ paddingTop: 10 }}>
-
-            {/* Top accent rule */}
+          <div style={{ paddingTop: 10, flexShrink: 0 }}>
             <div style={{ height: 2, background: '#E24B4A', marginBottom: 0 }} />
 
-            {/* Credit line + YouTube button */}
-            <div className="flex items-start justify-between" style={{ paddingTop: 4, paddingBottom: 0 }}>
+            <div className="flex items-start justify-between" style={{ paddingTop: 4 }}>
               <div>
                 <p style={{
                   fontSize: 11,
@@ -74,18 +60,16 @@ const LyricPage = forwardRef(function LyricPage(
                   letterSpacing: '1.5px',
                   lineHeight: '19px',
                   margin: 0,
-                  textTransform: 'none',
                 }}>
                   原曲&ensp;{song.originalTitle}&ensp;·&ensp;原唱&ensp;{song.originalArtist}
                 </p>
 
-                {/* Song title */}
                 <h1 style={{
-                  fontSize: 26,
+                  fontSize: compact ? 20 : 26,
                   fontWeight: 500,
-                  letterSpacing: '7px',
+                  letterSpacing: compact ? '4px' : '7px',
                   color: '#2C2C2A',
-                  lineHeight: '38px',
+                  lineHeight: `${RHYTHM}px`,
                   margin: 0,
                   marginTop: 2,
                 }}>
@@ -104,7 +88,7 @@ const LyricPage = forwardRef(function LyricPage(
                 </h1>
               </div>
 
-              {/* 聆聽原曲 — real <a> tag; onPointerDown stops pageflip gesture capture */}
+              {/* 聆聽原曲 link */}
               <a
                 href={ytUrl}
                 target="_blank"
@@ -112,11 +96,7 @@ const LyricPage = forwardRef(function LyricPage(
                 aria-label="聆聽原曲"
                 onPointerDown={e => e.stopPropagation()}
                 className="flex flex-col items-center flex-shrink-0 cursor-pointer"
-                style={{
-                  textDecoration: 'none',
-                  marginLeft: 14,
-                  marginTop: 4,
-                }}
+                style={{ textDecoration: 'none', marginLeft: 14, marginTop: 4 }}
               >
                 <div style={{
                   width: 40, height: 40,
@@ -126,7 +106,6 @@ const LyricPage = forwardRef(function LyricPage(
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  {/* YouTube icon */}
                   <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                     <rect width="24" height="24" rx="5" fill="#FF0000"/>
                     <polygon points="10,7 18,12 10,17" fill="white"/>
@@ -138,33 +117,38 @@ const LyricPage = forwardRef(function LyricPage(
               </a>
             </div>
 
-            {/* Divider rule */}
-            <div style={{ height: 1, background: '#C9C284', marginTop: 6, marginBottom: 0 }} />
+            <div style={{ height: 1, background: '#C9C284', marginTop: 6 }} />
           </div>
         ) : (
           /* Continuation pages: small running header */
           <div style={{
-            paddingTop: 10,
+            paddingTop: compact ? 6 : 10,
             fontSize: 10,
             color: '#B4B2A9',
             letterSpacing: '3px',
             lineHeight: '19px',
+            flexShrink: 0,
           }}>
             {song.title}
           </div>
         )}
 
         {/* ── Lyrics ───────────────────────────────────────────── */}
-        <div className="flex-1 overflow-hidden" style={{ marginTop: showHeader ? 4 : 0 }}>
+        <div
+          className="flex-1"
+          style={{
+            marginTop: showHeader ? 4 : 0,
+            overflowY: compact ? 'auto' : 'hidden',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {lines.map((line, i) => {
             const lineKey  = `${song.id}-p${pageIndex}-l${i}`;
             const isActive = lineKey === activeLineKey;
             const isSung   = activeLinkOnThisPage !== -1 && i < activeLinkOnThisPage;
 
             if (line.type === 'blank') {
-              return (
-                <div key={lineKey} style={{ height: 38 }} aria-hidden="true" />
-              );
+              return <div key={lineKey} style={{ height: RHYTHM }} aria-hidden="true" />;
             }
 
             if (line.type === 'section') {
@@ -172,9 +156,13 @@ const LyricPage = forwardRef(function LyricPage(
                 <div
                   key={lineKey}
                   className="flex items-center gap-2"
-                  style={{ height: 38, lineHeight: '38px' }}
+                  style={{ height: RHYTHM, lineHeight: `${RHYTHM}px` }}
                 >
-                  <span style={{ flex: '0 0 16px', height: 1, background: '#E8A0A0', display: 'inline-block', marginBottom: 2 }} />
+                  <span style={{
+                    flex: '0 0 16px', height: 1,
+                    background: '#E8A0A0',
+                    display: 'inline-block', marginBottom: 2,
+                  }} />
                   <span style={{
                     fontSize: 10,
                     color: '#993C1D',
@@ -182,21 +170,19 @@ const LyricPage = forwardRef(function LyricPage(
                     fontWeight: 500,
                     textTransform: 'uppercase',
                   }}>
-                    {/* Strip square brackets if present */}
                     {line.text.replace(/^\[|\]$/g, '')}
                   </span>
                 </div>
               );
             }
 
-            // Lyric line
             return (
               <div
                 key={lineKey}
                 className={isActive ? 'line-active' : isSung ? 'line-sung' : 'line-upcoming'}
                 style={{
-                  fontSize: 17,
-                  lineHeight: '38px',
+                  fontSize: FONT_SIZE,
+                  lineHeight: `${RHYTHM}px`,
                   letterSpacing: '1.5px',
                   userSelect: 'none',
                 }}
