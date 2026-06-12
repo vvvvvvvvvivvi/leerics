@@ -3,11 +3,11 @@
 @theme {
   /* ── Colour tokens ── */
   --color-paper:         #F7F4DA;
-  --color-cover-yellow:  #EFE8AC;
+  --color-cover-yellow:  #ead4fb;
   --color-ruled:         #E7E3C0;
   --color-playbar-track: #E5E1BE;
-  --color-spine:         #D8D196;
-  --color-page-border:   #C9C284;
+  --color-spine:         #c4a0e8;
+  --color-page-border:   #b090d0;
   --color-ink:           #2C2C2A;
   --color-ink-body:      #3A3A37;
   --color-ink-alt:       #444441;
@@ -40,7 +40,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-wenkai);
-  background: #CECA9E;
+  background: #ddbef7;
   color: var(--color-ink-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

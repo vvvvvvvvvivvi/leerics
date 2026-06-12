@@ -14,7 +14,7 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
     <div
       ref={ref}
       className="relative w-full h-full overflow-hidden select-none"
-      style={{ background: '#EFE8AC', border: '2px solid #C9C284' }}
+      style={{ background: '#ead4fb', border: '2px solid #b090d0' }}
     >
       {/* Scanned cover */}
       {!imgError ? (
@@ -28,14 +28,14 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
       ) : (
         /* Fallback if image not yet exported */
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8"
-          style={{ background: '#EFE8AC' }}>
+          style={{ background: '#ead4fb' }}>
           <p style={{ fontFamily: 'var(--font-wenkai)', fontSize: 28, fontWeight: 500,
             letterSpacing: '8px', color: '#2C2C2A', fontStyle: 'italic' }}>
             Portfolio
           </p>
           <p style={{ fontFamily: 'var(--font-wenkai)', fontSize: 13, letterSpacing: '3px',
             color: '#5F5E5A' }}>BOOK</p>
-          <div style={{ width: 120, height: 1, background: '#C9C284', margin: '8px 0' }} />
+          <div style={{ width: 120, height: 1, background: '#b090d0', margin: '8px 0' }} />
           <p style={{ fontFamily: 'var(--font-wenkai)', fontStyle: 'italic', fontSize: 22,
             color: '#3A3A37', letterSpacing: '2px' }}>Eiro</p>
           <p style={{ fontFamily: 'var(--font-wenkai)', fontSize: 12, color: '#5F5E5A',

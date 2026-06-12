@@ -108,7 +108,7 @@ export default function PlayBar({ song, playState, position, duration, onToggle,
 function PlayIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="8.5" stroke="#C9C284"/>
+      <circle cx="9" cy="9" r="8.5" stroke="#b090d0"/>
       <polygon points="7,5.5 13.5,9 7,12.5" fill="#3A3A37"/>
     </svg>
   );
@@ -117,7 +117,7 @@ function PlayIcon() {
 function PauseIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="8.5" stroke="#C9C284"/>
+      <circle cx="9" cy="9" r="8.5" stroke="#b090d0"/>
       <rect x="5.5" y="5.5" width="2.5" height="7" rx="1" fill="#3A3A37"/>
       <rect x="10" y="5.5" width="2.5" height="7" rx="1" fill="#3A3A37"/>
     </svg>

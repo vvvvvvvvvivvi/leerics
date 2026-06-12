@@ -16,12 +16,12 @@ const LyricPage = forwardRef(function LyricPage(
 
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
+  // PlayBar: every page on mobile (compact), only last page on desktop
+  const showPlayBar = isLastPage || compact;
 
   const activeLinkOnThisPage = lines.findIndex((_, li) =>
     `${song.id}-p${pageIndex}-l${li}` === activeLineKey
   );
-
-  const ytUrl = song.youtubeUrl ?? `https://www.youtube.com/watch?v=${song.youtubeId}`;
 
   return (
     <div
@@ -34,7 +34,7 @@ const LyricPage = forwardRef(function LyricPage(
           linear-gradient(90deg, transparent ${MARGIN}px, #E8A0A0 ${MARGIN}px, #E8A0A0 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)
         `,
         backgroundSize: `100% ${RHYTHM}px, 100% 100%`,
-        border: '2px solid #C9C284',
+        border: '2px solid #b090d0',
         fontFamily: 'var(--font-wenkai)',
       }}
     >
@@ -43,7 +43,7 @@ const LyricPage = forwardRef(function LyricPage(
         style={{
           paddingLeft: MARGIN + 10,
           paddingRight: 18,
-          paddingBottom: isLastPage ? 54 : 12,
+          paddingBottom: showPlayBar ? 54 : 12,
         }}
       >
 
@@ -52,72 +52,42 @@ const LyricPage = forwardRef(function LyricPage(
           <div style={{ paddingTop: 10, flexShrink: 0 }}>
             <div style={{ height: 2, background: '#E24B4A', marginBottom: 0 }} />
 
-            <div className="flex items-start justify-between" style={{ paddingTop: 4 }}>
-              <div>
-                <p style={{
-                  fontSize: 11,
-                  color: '#993C1D',
-                  letterSpacing: '1.5px',
-                  lineHeight: '19px',
-                  margin: 0,
-                }}>
-                  原曲&ensp;{song.originalTitle}&ensp;·&ensp;原唱&ensp;{song.originalArtist}
-                </p>
+            <div style={{ paddingTop: 4 }}>
+              <p style={{
+                fontSize: 11,
+                color: '#993C1D',
+                letterSpacing: '1.5px',
+                lineHeight: '19px',
+                margin: 0,
+              }}>
+                原曲&ensp;{song.originalTitle}&ensp;·&ensp;原唱&ensp;{song.originalArtist}
+              </p>
 
-                <h1 style={{
-                  fontSize: compact ? 20 : 26,
-                  fontWeight: 500,
-                  letterSpacing: compact ? '4px' : '7px',
-                  color: '#2C2C2A',
-                  lineHeight: `${RHYTHM}px`,
-                  margin: 0,
-                  marginTop: 2,
-                }}>
-                  {song.title}
-                  {song.subtitle && (
-                    <span style={{
-                      fontSize: 13,
-                      fontWeight: 400,
-                      letterSpacing: '1px',
-                      color: '#5F5E5A',
-                      marginLeft: 10,
-                    }}>
-                      {song.subtitle}
-                    </span>
-                  )}
-                </h1>
-              </div>
-
-              {/* 聆聽原曲 link */}
-              <a
-                href={ytUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="聆聽原曲"
-                onPointerDown={e => e.stopPropagation()}
-                className="flex flex-col items-center flex-shrink-0 cursor-pointer"
-                style={{ textDecoration: 'none', marginLeft: 14, marginTop: 4 }}
-              >
-                <div style={{
-                  width: 40, height: 40,
-                  borderRadius: 4,
-                  background: '#1a1a18',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect width="24" height="24" rx="5" fill="#FF0000"/>
-                    <polygon points="10,7 18,12 10,17" fill="white"/>
-                  </svg>
-                </div>
-                <span style={{ fontSize: 9, color: '#888780', marginTop: 3, letterSpacing: '0.5px' }}>
-                  聆聽原曲
-                </span>
-              </a>
+              <h1 style={{
+                fontSize: compact ? 20 : 26,
+                fontWeight: 500,
+                letterSpacing: compact ? '4px' : '7px',
+                color: '#2C2C2A',
+                lineHeight: `${RHYTHM}px`,
+                margin: 0,
+                marginTop: 2,
+              }}>
+                {song.title}
+                {song.subtitle && (
+                  <span style={{
+                    fontSize: 13,
+                    fontWeight: 400,
+                    letterSpacing: '1px',
+                    color: '#5F5E5A',
+                    marginLeft: 10,
+                  }}>
+                    {song.subtitle}
+                  </span>
+                )}
+              </h1>
             </div>
 
-            <div style={{ height: 1, background: '#C9C284', marginTop: 6 }} />
+            <div style={{ height: 1, background: '#b090d0', marginTop: 6 }} />
           </div>
         ) : (
           /* Continuation pages: small running header */
@@ -201,14 +171,14 @@ const LyricPage = forwardRef(function LyricPage(
           fontSize: 10,
           color: '#B4B2A9',
           letterSpacing: '3px',
-          paddingBottom: isLastPage ? 58 : 5,
+          paddingBottom: showPlayBar ? 58 : 5,
         }}
       >
         — {absolutePageNum} —
       </div>
 
       {/* Playbar */}
-      {isLastPage && (
+      {showPlayBar && (
         <PlayBar
           song={song}
           playState={playState}

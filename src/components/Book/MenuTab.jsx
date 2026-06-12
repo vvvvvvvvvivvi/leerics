@@ -38,7 +38,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         style={{
           width: 236,
           background: '#F7F4DA',
-          borderLeft: '2px solid #C9C284',
+          borderLeft: '2px solid #b090d0',
           transform: open ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.3s ease',
           fontFamily: 'var(--font-wenkai)',
@@ -49,7 +49,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
           className="flex items-center justify-between flex-shrink-0"
           style={{
             padding: '16px 20px 14px',
-            borderBottom: '1px solid #C9C284',
+            borderBottom: '1px solid #b090d0',
           }}
         >
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '4px', color: '#5F5E5A' }}>
@@ -71,7 +71,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         <button
           role="menuitem"
           onClick={onCover}
-          className="text-left hover:bg-[#EFE8AC] transition-colors flex-shrink-0"
+          className="text-left hover:bg-[#ead4fb] transition-colors flex-shrink-0"
           style={{
             padding: '12px 20px',
             fontSize: 12,
@@ -92,7 +92,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
                 key={song.id}
                 role="menuitem"
                 onClick={() => onSong(song.id)}
-                className="text-left hover:bg-[#EFE8AC] transition-colors"
+                className="text-left hover:bg-[#ead4fb] transition-colors"
                 style={{
                   padding: '11px 20px',
                   borderBottom: '1px solid #E7E3C0',
@@ -104,7 +104,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
               >
                 <span style={{
                   fontSize: 10,
-                  color: isActive ? '#E24B4A' : '#C9C284',
+                  color: isActive ? '#E24B4A' : '#b090d0',
                   fontVariantNumeric: 'tabular-nums',
                   letterSpacing: '1px',
                   flexShrink: 0,

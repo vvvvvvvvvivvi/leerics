@@ -104,7 +104,7 @@ const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
               key={col.label}
               className="flex-1 flex flex-col items-center overflow-hidden"
               style={{
-                borderLeft: ci < COLUMNS.length - 1 ? '1px solid #C9C284' : 'none',
+                borderLeft: ci < COLUMNS.length - 1 ? '1px solid #b090d0' : 'none',
               }}
             >
               {/* Category title */}

@@ -105,7 +105,7 @@ export default function BookLayout() {
   return (
     <div
       className="relative flex flex-col items-center justify-center w-full min-h-screen"
-      style={{ background: isMobile ? '#F7F4DA' : '#CECA9E' }}
+      style={{ background: isMobile ? '#F7F4DA' : '#ddbef7' }}
     >
 
       {isMobile ? (
@@ -158,7 +158,7 @@ export default function BookLayout() {
           {/* Spine */}
           <div
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-            style={{ width: 14, background: '#D8D196' }}
+            style={{ width: 14, background: '#c4a0e8' }}
           />
 
           {/* ← desktop arrow */}
@@ -169,7 +169,7 @@ export default function BookLayout() {
               className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-opacity hover:opacity-100 opacity-50"
               style={{
                 width: 36, height: 56,
-                background: 'rgba(216,209,150,0.7)',
+                background: 'rgba(196,160,232,0.7)',
                 border: 'none', cursor: 'pointer',
                 borderRadius: '0 4px 4px 0',
               }}
@@ -188,7 +188,7 @@ export default function BookLayout() {
               className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-opacity hover:opacity-100 opacity-50"
               style={{
                 width: 36, height: 56,
-                background: 'rgba(216,209,150,0.7)',
+                background: 'rgba(196,160,232,0.7)',
                 border: 'none', cursor: 'pointer',
                 borderRadius: '4px 0 0 4px',
               }}
@@ -210,7 +210,7 @@ export default function BookLayout() {
             paddingLeft: 28,
             paddingRight: 28,
             background: '#F7F4DA',
-            borderTop: '1px solid #C9C284',
+            borderTop: '1px solid #b090d0',
             fontFamily: 'var(--font-wenkai)',
           }}
         >
