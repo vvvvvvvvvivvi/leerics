@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Colour tokens ── */
+  --color-paper:         #F7F4DA;
+  --color-cover-yellow:  #EFE8AC;
+  --color-ruled:         #E7E3C0;
+  --color-playbar-track: #E5E1BE;
+  --color-spine:         #D8D196;
+  --color-page-border:   #C9C284;
+  --color-ink:           #2C2C2A;
+  --color-ink-body:      #3A3A37;
+  --color-ink-alt:       #444441;
+  --color-muted:         #5F5E5A;
+  --color-muted-light:   #888780;
+  --color-dimmed:        #B4B2A9;
+  --color-accent:        #E24B4A;
+  --color-accent-dark:   #A32D2D;
+  --color-section:       #993C1D;
+  --color-margin-rule:   #E8A0A0;
+
+  /* ── Typography ── */
+  --font-wenkai: 'LXGW WenKai', 'Noto Sans TC', sans-serif;
+
+  /* ── Ruled grid ── */
+  --spacing-rhythm: 38px;
+}
+
+/* ── Base reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-wenkai);
+  background: #CECA9E;
+  color: var(--color-ink-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Ruled paper ── */
+.ruled-paper {
+  background-color: var(--color-paper);
+  background-image: linear-gradient(var(--color-ruled) 1px, transparent 1px);
+  background-size: 100% 38px;
+}
+
+/* ── Karaoke emphasis dots ── */
+.line-active {
+  -webkit-text-emphasis: dot #E24B4A;
+  -webkit-text-emphasis-position: under left;
+  text-emphasis: dot #E24B4A;
+  text-emphasis-position: under left;
+  color: var(--color-ink);
+  font-weight: 500;
+  line-height: 38px;
+}
+
+.line-sung   { color: var(--color-dimmed); }
+.line-upcoming { color: var(--color-ink-body); }
+
+/* ── react-pageflip: kill default chrome ── */
+.stf__parent { background: transparent !important; }
+.stf__block  { background: transparent !important; }
