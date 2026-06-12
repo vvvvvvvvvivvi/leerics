@@ -1,10 +1,5 @@
 import { songs } from '../../data/songs';
 
-/**
- * 目錄 tab — protrudes from right edge of the book.
- * Tap-to-toggle on touch, hover-enhanced on desktop (never hover-only).
- * Flyout shows 返回封面 + numbered song list; current song highlighted in red.
- */
 export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId }) {
   return (
     <>
@@ -13,28 +8,23 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         onClick={onToggle}
         aria-label={open ? '關閉目錄' : '開啟目錄'}
         aria-expanded={open}
-        className="
-          fixed right-0 top-1/2 -translate-y-1/2 z-50
-          flex items-center justify-center
-          writing-mode-vertical select-none
-          cursor-pointer
-          transition-transform duration-200
-        "
+        className="fixed right-0 top-1/2 z-50 cursor-pointer select-none"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
           background: '#E24B4A',
           color: '#fff',
           fontFamily: 'var(--font-wenkai)',
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 600,
-          letterSpacing: '3px',
-          padding: '14px 6px',
+          letterSpacing: '4px',
+          padding: '16px 8px',
+          border: 'none',
           borderTopLeftRadius: 6,
           borderBottomLeftRadius: 6,
-          transform: open
-            ? 'translateY(-50%) translateX(-4px)'
-            : 'translateY(-50%)',
+          transform: open ? 'translateY(-50%) translateX(-236px)' : 'translateY(-50%)',
+          transition: 'transform 0.3s ease',
+          zIndex: 51,
         }}
       >
         目錄
@@ -43,34 +33,58 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
       {/* Flyout panel */}
       <div
         role="menu"
-        className="
-          fixed right-0 top-0 bottom-0 z-40
-          flex flex-col
-          overflow-y-auto
-          transition-transform duration-300 ease-in-out
-        "
+        aria-hidden={!open}
+        className="fixed right-0 top-0 bottom-0 z-40 flex flex-col overflow-y-auto"
         style={{
-          width: 220,
+          width: 236,
           background: '#F7F4DA',
-          borderLeft: '1px solid #C9C284',
+          borderLeft: '2px solid #C9C284',
           transform: open ? 'translateX(0)' : 'translateX(100%)',
-          paddingTop: 56,
-          paddingBottom: 24,
+          transition: 'transform 0.3s ease',
           fontFamily: 'var(--font-wenkai)',
         }}
       >
+        {/* Panel header */}
+        <div
+          className="flex items-center justify-between flex-shrink-0"
+          style={{
+            padding: '16px 20px 14px',
+            borderBottom: '1px solid #C9C284',
+          }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '4px', color: '#5F5E5A' }}>
+            目錄
+          </span>
+          <button
+            onClick={onToggle}
+            aria-label="關閉目錄"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#B4B2A9', fontSize: 18, lineHeight: 1, padding: '2px 4px',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
         {/* 返回封面 */}
         <button
           role="menuitem"
           onClick={onCover}
-          className="text-left px-5 py-3 text-sm hover:bg-[#EFE8AC] transition-colors"
-          style={{ color: '#5F5E5A', borderBottom: '1px solid #E7E3C0' }}
+          className="text-left hover:bg-[#EFE8AC] transition-colors flex-shrink-0"
+          style={{
+            padding: '12px 20px',
+            fontSize: 12,
+            color: '#5F5E5A',
+            borderBottom: '1px solid #E7E3C0',
+            letterSpacing: '1px',
+          }}
         >
-          返回封面
+          ← 返回封面
         </button>
 
         {/* Song list */}
-        <div className="flex flex-col mt-1">
+        <div className="flex flex-col">
           {songs.map((song, i) => {
             const isActive = song.id === activeSongId;
             return (
@@ -78,24 +92,37 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
                 key={song.id}
                 role="menuitem"
                 onClick={() => onSong(song.id)}
-                className="text-left px-5 py-3 text-sm hover:bg-[#EFE8AC] transition-colors"
+                className="text-left hover:bg-[#EFE8AC] transition-colors"
                 style={{
-                  color: isActive ? '#E24B4A' : '#3A3A37',
-                  fontWeight: isActive ? 600 : 400,
+                  padding: '11px 20px',
                   borderBottom: '1px solid #E7E3C0',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 12,
+                  background: isActive ? '#F0ECC8' : 'transparent',
                 }}
               >
-                <span
-                  className="inline-block mr-3 text-xs"
-                  style={{ color: '#B4B2A9', minWidth: 20 }}
-                >
+                <span style={{
+                  fontSize: 10,
+                  color: isActive ? '#E24B4A' : '#C9C284',
+                  fontVariantNumeric: 'tabular-nums',
+                  letterSpacing: '1px',
+                  flexShrink: 0,
+                  width: 20,
+                  textAlign: 'right',
+                }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                {song.title}
-                {song.subtitle && (
-                  <span className="block text-xs ml-8 mt-0.5" style={{ color: '#888780' }}>
-                    {song.subtitle}
-                  </span>
+                <span style={{ fontSize: 13, color: isActive ? '#E24B4A' : '#3A3A37', fontWeight: isActive ? 600 : 400 }}>
+                  {song.title}
+                  {song.subtitle && (
+                    <span style={{ display: 'block', fontSize: 10, color: '#888780', fontWeight: 400, marginTop: 1 }}>
+                      {song.subtitle}
+                    </span>
+                  )}
+                </span>
+                {isActive && (
+                  <span style={{ marginLeft: 'auto', color: '#E24B4A', fontSize: 10, flexShrink: 0 }}>▶</span>
                 )}
               </button>
             );
@@ -103,13 +130,13 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         </div>
       </div>
 
-      {/* Backdrop on mobile */}
+      {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-30 sm:hidden"
+          className="fixed inset-0 z-30"
           onClick={onToggle}
           aria-hidden="true"
-          style={{ background: 'rgba(0,0,0,0.15)' }}
+          style={{ background: 'rgba(0,0,0,0.08)' }}
         />
       )}
     </>

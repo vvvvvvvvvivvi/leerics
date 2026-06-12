@@ -38,26 +38,6 @@ function songsByCategory() {
   return map;
 }
 
-const CartoucheSVG = () => (
-  <svg
-    viewBox="0 0 160 32"
-    xmlns="http://www.w3.org/2000/svg"
-    className="absolute inset-0 w-full h-full"
-    preserveAspectRatio="none"
-  >
-    {/* Simple geometric stand-in for the floral cartouche — traced from scan */}
-    <rect x="1" y="1" width="158" height="30" rx="4" ry="4"
-      fill="none" stroke="#1a1a18" strokeWidth="1.5"/>
-    {/* Corner flourishes */}
-    <path d="M8,1 Q1,1 1,8" fill="none" stroke="#1a1a18" strokeWidth="1"/>
-    <path d="M152,1 Q159,1 159,8" fill="none" stroke="#1a1a18" strokeWidth="1"/>
-    <path d="M8,31 Q1,31 1,24" fill="none" stroke="#1a1a18" strokeWidth="1"/>
-    <path d="M152,31 Q159,31 159,24" fill="none" stroke="#1a1a18" strokeWidth="1"/>
-    {/* Inner border */}
-    <rect x="4" y="3" width="152" height="26" rx="2" ry="2"
-      fill="none" stroke="#1a1a18" strokeWidth="0.75" strokeDasharray="2,2"/>
-  </svg>
-);
 
 const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
   const byCat = songsByCategory();
@@ -73,24 +53,24 @@ const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
         fontFamily: 'var(--font-wenkai)',
       }}
     >
-      {/* Header block ─ 歌因九 */}
+      {/* Header block ─ 歌因九 — full-width, double-border, centred */}
       <div
-        className="relative mx-auto mt-4"
-        style={{ width: '75%', height: 40 }}
+        className="flex items-center justify-center mx-4 mt-4"
+        style={{
+          height: 44,
+          border: '2px solid #1a1a18',
+          outline: '3px solid #1a1a18',
+          outlineOffset: '-7px',
+          background: '#F7F4DA',
+        }}
       >
-        <CartoucheSVG />
         <div
-          className="relative z-10 flex items-center justify-center w-full h-full"
-          style={{
-            writingMode: 'horizontal-tb',
-            direction: 'rtl',
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: '6px',
-            color: '#1a1a18',
-          }}
+          className="flex justify-evenly w-full px-4"
+          style={{ fontSize: 18, fontWeight: 700, color: '#1a1a18' }}
         >
-          歌因九
+          <span>歌</span>
+          <span>因</span>
+          <span>九</span>
         </div>
       </div>
 

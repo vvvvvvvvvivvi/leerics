@@ -67,6 +67,6 @@ body {
 .line-sung   { color: var(--color-dimmed); }
 .line-upcoming { color: var(--color-ink-body); }
 
-/* ── react-pageflip: kill default chrome ── */
+/* ── react-pageflip: solid page background during flip animation ── */
 .stf__parent { background: transparent !important; }
-.stf__block  { background: transparent !important; }
+.stf__block  { background: #F7F4DA !important; }

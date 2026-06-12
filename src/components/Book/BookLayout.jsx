@@ -89,10 +89,8 @@ export default function BookLayout() {
             usePortrait={false}
             startPage={0}
             drawShadow={false}
-            /* Disable click-anywhere-to-flip so links/buttons work */
-            disableFlipByClick={true}
-            /* Require intentional swipe */
-            swipeDistance={40}
+            /* Disable all mouse-based flip (hover corners, click, drag) */
+            useMouseEvents={false}
             /* Forward click events to page content */
             clickEventForward={true}
             onFlip={onFlip}

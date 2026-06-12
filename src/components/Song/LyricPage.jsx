@@ -32,9 +32,7 @@ const LyricPage = forwardRef(function LyricPage(
     return `${song.id}-p${pageIndex}-l${li}` === activeLineKey;
   });
 
-  function openYouTube() {
-    window.open(`https://www.youtube.com/watch?v=${song.youtubeId}`, '_blank', 'noopener,noreferrer');
-  }
+  const ytUrl = song.youtubeUrl ?? `https://www.youtube.com/watch?v=${song.youtubeId}`;
 
   return (
     <div
@@ -106,17 +104,16 @@ const LyricPage = forwardRef(function LyricPage(
                 </h1>
               </div>
 
-              {/* 聆聽原曲 button — stopPropagation so pageflip doesn't intercept */}
-              <button
-                onClick={openYouTube}
-                onMouseDown={e => e.stopPropagation()}
-                onTouchStart={e => { e.stopPropagation(); openYouTube(); }}
+              {/* 聆聽原曲 — real <a> tag; onPointerDown stops pageflip gesture capture */}
+              <a
+                href={ytUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="聆聽原曲"
+                onPointerDown={e => e.stopPropagation()}
                 className="flex flex-col items-center flex-shrink-0 cursor-pointer"
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
+                  textDecoration: 'none',
                   marginLeft: 14,
                   marginTop: 4,
                 }}
@@ -138,7 +135,7 @@ const LyricPage = forwardRef(function LyricPage(
                 <span style={{ fontSize: 9, color: '#888780', marginTop: 3, letterSpacing: '0.5px' }}>
                   聆聽原曲
                 </span>
-              </button>
+              </a>
             </div>
 
             {/* Divider rule */}
