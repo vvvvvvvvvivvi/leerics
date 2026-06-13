@@ -1,7 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { songs } from '../../data/songs';
-
-const BASE = import.meta.env.BASE_URL;
+import frontImg from '../../assets/front.png';
 
 /**
  * CoverLeft — scanned exercise-book cover.
@@ -31,7 +30,7 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
       {/* Scanned cover */}
       {!imgError ? (
         <img
-          src={`${BASE}assets/cover/cover.png`}
+          src={frontImg}
           alt="Eiro 2020–2025 填詞作品集 封面"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           draggable={false}

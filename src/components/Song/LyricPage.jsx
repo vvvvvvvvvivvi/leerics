@@ -1,14 +1,13 @@
 import { forwardRef } from 'react';
 import PlayBar from './PlayBar';
 import { useKaraoke } from '../../hooks/useKaraoke';
+import paperL1 from '../../assets/L1.png';
+import paperR1 from '../../assets/R1.png';
 
 const MARGIN = 32; // px — left margin rule position
 
 // Mobile: PlayBar at bottom:0; content needs clearance
 const COMPACT_BOTTOM_PAD = 56; // 48px playbar + 8px gap
-
-// SVG paper grain — subtle fractal noise tiled at 300×300
-const GRAIN_URL = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.048'/%3E%3C/svg%3E\")";
 
 const LyricPage = forwardRef(function LyricPage(
   { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
@@ -23,6 +22,9 @@ const LyricPage = forwardRef(function LyricPage(
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
   const showPlayBar = isLastPage || compact;
+
+  // Odd absolutePageNum → L1 paper; even → R1 paper (alternates facing pages)
+  const paperSrc = absolutePageNum % 2 === 1 ? paperL1 : paperR1;
 
   // Scanner aesthetic: even absolutePageNum = left page (gutter on right)
   //                    odd  absolutePageNum = right page (gutter on left)
@@ -39,11 +41,13 @@ const LyricPage = forwardRef(function LyricPage(
       style={{
         background: '#EDE8D0',
         backgroundImage: [
-          GRAIN_URL,
-          `linear-gradient(#D4C9A8 1px, transparent 1px)`,
+          // Margin rule (purple vertical line) sits on top
           `linear-gradient(90deg, transparent ${MARGIN}px, #C4A0E4 ${MARGIN}px, #C4A0E4 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)`,
+          // Scanned paper texture — different for each page side
+          `url("${paperSrc}")`,
         ].join(', '),
-        backgroundSize: `300px 300px, 100% ${RHYTHM}px, 100% 100%`,
+        backgroundSize: `100% 100%, cover`,
+        backgroundRepeat: 'no-repeat, no-repeat',
         border: '1px solid rgba(160,120,200,0.18)',
         fontFamily: 'var(--font-wenkai)',
       }}
@@ -89,24 +93,10 @@ const LyricPage = forwardRef(function LyricPage(
 
         {/* ── First-page header ─────────────────────────────────── */}
         {showHeader ? (
-          <div style={{ paddingTop: 10, flexShrink: 0, position: 'relative' }}>
+          <div style={{ paddingTop: 10, flexShrink: 0 }}>
+            <div style={{ height: 2, background: '#9b59d4' }} />
 
-            {/* Washi tape strip across the header */}
-            <div style={{
-              position: 'absolute',
-              top: 14,
-              left: -(MARGIN + 20),
-              width: '65%',
-              height: 15,
-              background: 'repeating-linear-gradient(90deg, rgba(160,200,155,0.38) 0px, rgba(155,195,150,0.33) 4px, rgba(170,210,165,0.32) 4px, rgba(160,200,155,0.36) 8px)',
-              transform: 'rotate(-0.6deg)',
-              borderRadius: '1px 2px 2px 1px',
-              pointerEvents: 'none',
-            }} />
-
-            <div style={{ height: 2, background: '#9b59d4', position: 'relative', zIndex: 1 }} />
-
-            <div style={{ paddingTop: 4, position: 'relative', zIndex: 1 }}>
+            <div style={{ paddingTop: 4 }}>
               <p style={{
                 fontSize: 11,
                 color: '#6b3fa0',
@@ -141,7 +131,7 @@ const LyricPage = forwardRef(function LyricPage(
               </h1>
             </div>
 
-            <div style={{ height: 1, background: '#A890C8', marginTop: 6, position: 'relative', zIndex: 1 }} />
+            <div style={{ height: 1, background: '#A890C8', marginTop: 6 }} />
           </div>
         ) : (
           <div style={{

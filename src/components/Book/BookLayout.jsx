@@ -152,7 +152,7 @@ export default function BookLayout() {
   // ── Page arrays ──────────────────────────────────────────────────────────
   const desktopPages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
-    <JiuYinGe  key="jiuyinge"   onSongClick={goToSong} />,
+    <JiuYinGe  key="jiuyinge" />,
     ...desktopSongs.flatMap((song, si) =>
       song.pages.map((_, pi) => (
         <SongSpread
@@ -248,10 +248,12 @@ export default function BookLayout() {
             {desktopPages}
           </HTMLFlipBook>
 
-          {/* Spine */}
+          {/* Binding gutter shadow — organic darkening where pages curve into spine */}
           <div
-            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-            style={{ width: 7, background: '#B898D8' }}
+            className="absolute top-0 bottom-0 left-0 right-0 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent 35%, rgba(0,0,0,0.07) 44%, rgba(0,0,0,0.19) 50%, rgba(0,0,0,0.07) 56%, transparent 65%)',
+            }}
           />
 
           {/* Prev arrow */}

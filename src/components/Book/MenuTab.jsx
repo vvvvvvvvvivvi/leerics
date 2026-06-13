@@ -3,31 +3,52 @@ import { songs } from '../../data/songs';
 export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId }) {
   return (
     <>
-      {/* Tab trigger */}
+      {/* Post-it index flag tab — translucent plastic film stuck to right page edge */}
       <button
         onClick={onToggle}
         aria-label={open ? '關閉目錄' : '開啟目錄'}
         aria-expanded={open}
-        className="fixed right-0 top-1/2 z-50 cursor-pointer select-none"
+        className="fixed right-0 z-50 cursor-pointer select-none"
         style={{
-          writingMode: 'vertical-rl',
-          textOrientation: 'mixed',
-          background: '#9b59d4',
-          color: '#fff',
-          fontFamily: 'var(--font-wenkai)',
-          fontSize: 13,
-          fontWeight: 600,
-          letterSpacing: '4px',
-          padding: '16px 8px',
+          top: '20%',
+          width: 30,
+          height: 72,
+          background: 'linear-gradient(160deg, rgba(210,175,255,0.78) 0%, rgba(155,89,212,0.62) 55%, rgba(128,60,205,0.70) 100%)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
           border: 'none',
-          borderTopLeftRadius: 6,
-          borderBottomLeftRadius: 6,
-          transform: open ? 'translateY(-50%) translateX(-236px)' : 'translateY(-50%)',
+          borderRadius: '3px 0 0 3px',
+          boxShadow: '-2px 1px 6px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.50)',
+          transform: open ? 'translateX(-236px)' : 'translateX(0)',
           transition: 'transform 0.3s ease',
-          zIndex: 51,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0,
         }}
       >
-        目錄
+        {/* Gloss streak */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '45%',
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), transparent)',
+          borderRadius: '3px 0 0 0',
+          pointerEvents: 'none',
+        }} />
+        <span style={{
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+          color: 'rgba(255,255,255,0.95)',
+          fontFamily: 'var(--font-wenkai)',
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: '3px',
+          textShadow: '0 1px 3px rgba(0,0,0,0.35)',
+          position: 'relative',
+        }}>
+          目錄
+        </span>
       </button>
 
       {/* Flyout panel */}

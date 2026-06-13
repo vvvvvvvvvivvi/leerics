@@ -1,4 +1,5 @@
 import { useKaraoke } from '../../hooks/useKaraoke';
+import ipodImg from '../../assets/ipod.png';
 
 function fmt(sec) {
   if (!sec || isNaN(sec)) return '0:00';
@@ -10,8 +11,9 @@ function fmt(sec) {
 function stopBubble(e) { e.stopPropagation(); }
 
 /**
- * NanoPlayer — iPod nano 6th-gen style mini player clipped to the book edge.
- * Shares the singleton karaoke player with LyricPage for the same song.
+ * NanoPlayer — photographic iPod overlapping the right page.
+ * ipod.png is the device body; a screen overlay sits at the correct percentage
+ * position over the device photo for the live karaoke UI.
  */
 export default function NanoPlayer({ song }) {
   const { playState, position, duration, toggle } = useKaraoke(song);
@@ -21,187 +23,152 @@ export default function NanoPlayer({ song }) {
     <div
       style={{
         position: 'absolute',
-        right: 18,
-        top: '62%',
-        transform: 'translateY(-50%) rotate(3deg)',
+        right: -14,
+        top: '58%',
+        transform: 'translateY(-50%) rotate(-4deg)',
         zIndex: 25,
-        /* Larger shadow so it looks physically resting on the page */
-        filter: 'drop-shadow(-2px 6px 10px rgba(0,0,0,0.35)) drop-shadow(0 2px 3px rgba(0,0,0,0.20))',
+        width: 130,
         userSelect: 'none',
+        filter: 'drop-shadow(-5px 10px 18px rgba(0,0,0,0.50)) drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
       }}
       onMouseDown={stopBubble}
       onTouchStart={stopBubble}
     >
-      {/* Aluminium body */}
-      <div style={{
-        width: 62,
-        height: 88,
-        borderRadius: 14,
-        background: 'linear-gradient(160deg, #f4f4f4 0%, #e2e2e2 35%, #d4d4d4 65%, #c8c8c8 100%)',
-        border: '1px solid #b0b0b0',
-        position: 'relative',
-        overflow: 'visible',
-      }}>
+      <div style={{ position: 'relative', width: '100%' }}>
 
-        {/* Polished chamfer edge highlight */}
+        {/* Physical device photo */}
+        <img
+          src={ipodImg}
+          alt="iPod"
+          style={{ width: '100%', display: 'block', pointerEvents: 'none' }}
+          draggable={false}
+        />
+
+        {/* Screen overlay — layered over the device's actual screen area.
+            Percentages match the iPod classic screen position within the 1024×1024 photo. */}
         <div style={{
           position: 'absolute',
-          inset: 0,
-          borderRadius: 14,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 50%)',
-          pointerEvents: 'none',
-        }} />
-
-        {/* Screen recess */}
-        <div style={{
-          position: 'absolute',
-          top: 6, left: 5, right: 5,
-          height: 60,
-          background: '#0e0e0e',
-          borderRadius: 8,
-          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.7)',
+          top: '8%',
+          left: '14%',
+          right: '14%',
+          height: '40%',
+          background: 'rgba(14,14,18,0.88)',
+          borderRadius: 3,
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '6px 7px 5px',
+          boxSizing: 'border-box',
         }}>
-          {/* Glass glare */}
+          {/* Screen glare */}
           <div style={{
             position: 'absolute',
-            top: 0, left: 0, right: 0,
-            height: '38%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.10), transparent)',
-            borderRadius: '8px 8px 0 0',
+            top: 0, left: 0, right: 0, height: '35%',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)',
             pointerEvents: 'none',
-            zIndex: 1,
           }} />
 
-          {/* Content */}
+          {/* Artist */}
           <div style={{
-            padding: '6px 6px 5px',
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            boxSizing: 'border-box',
+            fontSize: 5.5,
+            color: '#999',
+            letterSpacing: '0.4px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            fontFamily: 'var(--font-wenkai)',
+            flexShrink: 0,
             position: 'relative',
-            zIndex: 2,
+          }}>
+            {song.originalArtist}
+          </div>
+
+          {/* Title */}
+          <div style={{
+            fontSize: 8.5,
+            color: '#f2f2f2',
+            fontWeight: 700,
+            letterSpacing: '0.4px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: 1.3,
+            fontFamily: 'var(--font-wenkai)',
+            flexShrink: 0,
+            marginTop: 1,
+            position: 'relative',
+          }}>
+            {song.title}
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          {/* Progress bar */}
+          <div style={{
+            height: 2,
+            background: '#2a2a2a',
+            borderRadius: 1,
+            overflow: 'hidden',
+            marginBottom: 3,
+            flexShrink: 0,
+            position: 'relative',
           }}>
             <div style={{
-              fontSize: 6,
-              color: '#888',
-              letterSpacing: '0.8px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              marginBottom: 1,
-              fontFamily: 'var(--font-wenkai)',
-            }}>
-              {song.originalArtist}
-            </div>
+              height: '100%',
+              width: `${pct}%`,
+              background: 'linear-gradient(90deg, #7c3aed, #9b59d4)',
+              transition: 'width 0.3s linear',
+              borderRadius: 1,
+            }} />
+          </div>
 
-            <div style={{
-              fontSize: 8.5,
-              color: '#f2f2f2',
-              fontWeight: 700,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              letterSpacing: '0.4px',
-              lineHeight: 1.25,
-              fontFamily: 'var(--font-wenkai)',
-            }}>
-              {song.title}
-            </div>
-
-            {song.subtitle && (
-              <div style={{
-                fontSize: 5.5,
-                color: '#999',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                letterSpacing: '0.3px',
-                marginTop: 1,
-                fontFamily: 'var(--font-wenkai)',
-              }}>
-                {song.subtitle}
-              </div>
-            )}
-
-            <div style={{ marginTop: 'auto' }}>
-              <div style={{
-                height: 2,
-                background: '#252525',
-                borderRadius: 1,
-                overflow: 'hidden',
-                marginBottom: 3,
-              }}>
-                <div style={{
-                  height: '100%',
-                  width: `${pct}%`,
-                  background: 'linear-gradient(90deg, #7c3aed, #9b59d4)',
-                  transition: 'width 0.3s linear',
-                  borderRadius: 1,
-                }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 5.5, color: '#666', fontFamily: 'ui-monospace,monospace' }}>{fmt(position)}</span>
-                <span style={{ fontSize: 5.5, color: '#666', fontFamily: 'ui-monospace,monospace' }}>{fmt(duration)}</span>
-              </div>
-            </div>
+          {/* Time row */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexShrink: 0,
+            position: 'relative',
+          }}>
+            <span style={{ fontSize: 5, color: '#777', fontFamily: 'ui-monospace,monospace' }}>
+              {fmt(position)}
+            </span>
+            <button
+              onClick={toggle}
+              aria-label={playState === 'playing' ? '暫停' : '播放'}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#ccc',
+                fontSize: 7,
+                padding: 0,
+                lineHeight: 1,
+              }}
+            >
+              {playState === 'playing' ? '⏸' : '▶'}
+            </button>
+            <span style={{ fontSize: 5, color: '#777', fontFamily: 'ui-monospace,monospace' }}>
+              {fmt(duration)}
+            </span>
           </div>
         </div>
 
-        {/* Click-wheel style play/pause button */}
+        {/* Invisible click target over the scroll wheel for play/pause */}
         <button
           onClick={toggle}
           aria-label={playState === 'playing' ? '暫停' : '播放'}
           style={{
             position: 'absolute',
-            bottom: 7,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            background: 'linear-gradient(145deg, #ebebeb 0%, #c8c8c8 100%)',
-            border: '1px solid #a8a8a8',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.9)',
+            bottom: '14%',
+            left: '20%',
+            right: '20%',
+            height: '26%',
+            background: 'transparent',
+            border: 'none',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#444',
-            fontSize: 8,
-            lineHeight: 1,
-            padding: 0,
           }}
-        >
-          {playState === 'playing' ? (
-            <span style={{ letterSpacing: '-1px', paddingLeft: 1 }}>⏸</span>
-          ) : (
-            <span style={{ paddingLeft: 2 }}>▶</span>
-          )}
-        </button>
-
-        {/* Clip (right side) — the metal spring clip that grips the page */}
-        <div style={{
-          position: 'absolute',
-          right: -6,
-          top: 16,
-          bottom: 16,
-          width: 7,
-          background: 'linear-gradient(90deg, #b4b4b4 0%, #d4d4d4 50%, #b8b8b8 100%)',
-          borderRadius: '0 4px 4px 0',
-          boxShadow: '1px 0 3px rgba(0,0,0,0.18)',
-        }}>
-          {/* Clip spring tension hint */}
-          <div style={{
-            position: 'absolute',
-            top: '40%',
-            left: 1,
-            right: 1,
-            height: 1,
-            background: 'rgba(0,0,0,0.12)',
-          }} />
-        </div>
+        />
       </div>
     </div>
   );
