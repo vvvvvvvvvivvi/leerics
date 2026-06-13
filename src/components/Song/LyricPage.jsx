@@ -4,9 +4,9 @@ import { useKaraoke } from '../../hooks/useKaraoke';
 
 const MARGIN = 32; // px — left margin rule
 
-// On compact (mobile): PlayBar sits above the fixed nav bar (52px).
-// Content padding-bottom must clear PlayBar (48px) + nav bar (52px) + gap.
-const COMPACT_BOTTOM_PAD = 52 + 48 + 4; // 104px
+// On compact (mobile): PlayBar sits at bottom: 0 (no nav bar).
+// Content padding-bottom must clear PlayBar (48px) + gap.
+const COMPACT_BOTTOM_PAD = 56; // 48px playbar + 8px gap
 
 const LyricPage = forwardRef(function LyricPage(
   { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
@@ -163,8 +163,20 @@ const LyricPage = forwardRef(function LyricPage(
         </div>
       </div>
 
-      {/* Page number — desktop only; mobile shows indicator in nav bar */}
-      {!compact && (
+      {/* Page number */}
+      {compact ? (
+        <div
+          className="absolute left-0 right-0 text-center pointer-events-none"
+          style={{
+            bottom: 52, // above the 48px playbar + 4px gap
+            fontSize: 9,
+            color: '#B4B2A9',
+            letterSpacing: '3px',
+          }}
+        >
+          — {absolutePageNum} —
+        </div>
+      ) : (
         <div
           className="absolute bottom-0 left-0 right-0 text-center pointer-events-none"
           style={{

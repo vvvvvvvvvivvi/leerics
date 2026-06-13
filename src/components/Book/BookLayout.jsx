@@ -9,19 +9,23 @@ import { useViewport } from '../../hooks/useViewport';
 
 const BOOK_MAX_WIDTH  = 1200;
 const PAGE_ASPECT     = 0.707;
-const MOBILE_NAV_H    = 52;
-const MOBILE_RHYTHM   = 32;
-// Content must clear PlayBar (48px above nav bar) + nav bar (52px) + gap (4px)
-const COMPACT_BOTTOM  = 104;
-// Approximate pixel heights for the two header types in compact mode
-const COMPACT_FIRST_HEADER_H = 80; // rule + credit + title + divider + margins
-const COMPACT_CONT_HEADER_H  = 25; // paddingTop + running-title lineHeight
+
+// Mobile layout constants (no bottom nav bar; PlayBar at bottom: 0)
+const MOBILE_RHYTHM          = 32;
+const COMPACT_BOTTOM         = 56;  // PlayBar 48px + 8px gap
+const COMPACT_FIRST_HEADER_H = 80;
+const COMPACT_CONT_HEADER_H  = 25;
+
+// Desktop layout constants
+const DESKTOP_RHYTHM          = 38;
+const DESKTOP_FIRST_HEADER_H  = 80;
+const DESKTOP_CONT_HEADER_H   = 30;
+const DESKTOP_PLAYBAR_RESERVE = 54; // playbar height used conservatively for all pages
 
 /**
- * Flatten all song lines and re-split so every mobile page fits on screen.
- * Returns a new pages array whose length may differ from the original two pages.
+ * Flatten all song lines and re-split so every page fits on screen.
  */
-function splitSongForMobile(song, firstCap, contCap) {
+function splitSongPages(song, firstCap, contCap) {
   const allLines = song.pages.flat();
   if (allLines.length === 0) return [[]];
   const pages = [allLines.slice(0, firstCap)];
@@ -41,31 +45,52 @@ export default function BookLayout() {
   const { w: vw, h: vh, isMobile } = useViewport();
 
   // ── Mobile pagination ────────────────────────────────────────────────────
-  // How many lines fit per page type (floor so content never overflows)
-  const firstCap = Math.max(4, Math.floor((vh - COMPACT_FIRST_HEADER_H - COMPACT_BOTTOM) / MOBILE_RHYTHM));
-  const contCap  = Math.max(4, Math.floor((vh - COMPACT_CONT_HEADER_H  - COMPACT_BOTTOM) / MOBILE_RHYTHM));
+  const mobileFirstCap = Math.max(4, Math.floor((vh - COMPACT_FIRST_HEADER_H - COMPACT_BOTTOM) / MOBILE_RHYTHM));
+  const mobileContCap  = Math.max(4, Math.floor((vh - COMPACT_CONT_HEADER_H  - COMPACT_BOTTOM) / MOBILE_RHYTHM));
 
-  // Re-paginated songs for mobile; desktop songs are unchanged
   const mobileSongs = songs.map(song => ({
     ...song,
-    pages: splitSongForMobile(song, firstCap, contCap),
+    pages: splitSongPages(song, mobileFirstCap, mobileContCap),
   }));
 
-  // mobileOffsets[i] = flip-page index of songs[i]'s first lyric page
-  // page 0 = cover; song pages follow immediately (no 九因歌 on mobile)
   const mobileOffsets = [];
-  let mobileOffset = 1;
+  let mobileOffset = 1; // page 0 = cover
   mobileSongs.forEach(song => {
     mobileOffsets.push(mobileOffset);
     mobileOffset += song.pages.length;
   });
   const totalMobilePages = mobileOffset;
 
-  // Keep refs so the stable event handler always sees the latest values
-  const mobileOffsetsRef = useRef(mobileOffsets);
-  mobileOffsetsRef.current = mobileOffsets;
-  const isMobileRef = useRef(isMobile);
-  isMobileRef.current = isMobile;
+  // ── Desktop pagination ───────────────────────────────────────────────────
+  // Estimate rendered page height from viewport width
+  const desktopPageH = Math.min(
+    Math.floor(Math.min(vw / 2, 600) / PAGE_ASPECT),
+    848
+  );
+  const desktopFirstCap = Math.max(4, Math.floor(
+    (desktopPageH - DESKTOP_FIRST_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
+  ));
+  const desktopContCap = Math.max(4, Math.floor(
+    (desktopPageH - DESKTOP_CONT_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
+  ));
+
+  const desktopSongs = songs.map(song => ({
+    ...song,
+    pages: splitSongPages(song, desktopFirstCap, desktopContCap),
+  }));
+
+  const desktopOffsets = [];
+  let desktopOffset = 2; // page 0 = cover, page 1 = jiuyinge
+  desktopSongs.forEach(song => {
+    desktopOffsets.push(desktopOffset);
+    desktopOffset += song.pages.length;
+  });
+  const totalDesktopPages = desktopOffset;
+
+  // Stable refs so event handlers always see latest values
+  const mobileOffsetsRef  = useRef(mobileOffsets);  mobileOffsetsRef.current  = mobileOffsets;
+  const desktopOffsetsRef = useRef(desktopOffsets); desktopOffsetsRef.current = desktopOffsets;
+  const isMobileRef       = useRef(isMobile);       isMobileRef.current       = isMobile;
 
   // ── Navigation ───────────────────────────────────────────────────────────
   const goToSong = (songId) => {
@@ -73,7 +98,7 @@ export default function BookLayout() {
     if (idx === -1) return;
     setActiveSongId(songId);
     setMenuOpen(false);
-    const page = isMobile ? mobileOffsets[idx] : (2 + idx * 2);
+    const page = isMobile ? mobileOffsets[idx] : desktopOffsets[idx];
     flipRef.current?.pageFlip()?.flip(page);
   };
 
@@ -87,18 +112,25 @@ export default function BookLayout() {
     const p = e.data;
     setCurrentPage(p);
 
-    if (!isMobileRef.current) {
-      setActiveSongId(p < 2 ? null : (songs[Math.floor((p - 2) / 2)]?.id ?? null));
-      return;
+    if (isMobileRef.current) {
+      if (p === 0) { setActiveSongId(null); return; }
+      const offs = mobileOffsetsRef.current;
+      let found = null;
+      for (let i = 0; i < songs.length; i++) {
+        const end = i < songs.length - 1 ? offs[i + 1] : Infinity;
+        if (p >= offs[i] && p < end) { found = songs[i].id; break; }
+      }
+      setActiveSongId(found);
+    } else {
+      if (p < 2) { setActiveSongId(null); return; }
+      const offs = desktopOffsetsRef.current;
+      let found = null;
+      for (let i = 0; i < songs.length; i++) {
+        const end = i < songs.length - 1 ? offs[i + 1] : Infinity;
+        if (p >= offs[i] && p < end) { found = songs[i].id; break; }
+      }
+      setActiveSongId(found);
     }
-    if (p === 0) { setActiveSongId(null); return; }
-    const offs = mobileOffsetsRef.current;
-    let found = null;
-    for (let i = 0; i < songs.length; i++) {
-      const end = i < songs.length - 1 ? offs[i + 1] : Infinity;
-      if (p >= offs[i] && p < end) { found = songs[i].id; break; }
-    }
-    setActiveSongId(found);
   };
 
   // Auto page-turn: karaoke crosses a page boundary during playback
@@ -109,25 +141,25 @@ export default function BookLayout() {
       if (songIdx === -1) return;
       const targetPage = isMobileRef.current
         ? (mobileOffsetsRef.current[songIdx] ?? 0) + pageIdx
-        : 2 + songIdx * 2 + pageIdx;
+        : (desktopOffsetsRef.current[songIdx] ?? 0) + pageIdx;
       flipRef.current?.pageFlip()?.flip(targetPage);
     }
     window.addEventListener('karaoke-page-change', handlePageChange);
     return () => window.removeEventListener('karaoke-page-change', handlePageChange);
-  }, []); // stable — reads isMobile and offsets via refs
+  }, []); // stable — reads changing values via refs
 
   // ── Page arrays ──────────────────────────────────────────────────────────
   const desktopPages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     <JiuYinGe  key="jiuyinge"   onSongClick={goToSong} />,
-    ...songs.flatMap((song, si) =>
+    ...desktopSongs.flatMap((song, si) =>
       song.pages.map((_, pi) => (
         <SongSpread
-          key={`${song.id}-p${pi}`}
+          key={`d-${song.id}-p${pi}`}
           song={song}
           pageIndex={pi}
           totalPages={song.pages.length}
-          absolutePageNum={2 + si * 2 + pi}
+          absolutePageNum={desktopOffsets[si] + pi}
         />
       ))
     ),
@@ -135,13 +167,13 @@ export default function BookLayout() {
 
   const mobilePages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
-    ...songs.flatMap((song, si) =>
-      mobileSongs[si].pages.map((_, pi) => (
+    ...mobileSongs.flatMap((song, si) =>
+      song.pages.map((_, pi) => (
         <SongSpread
-          key={`${song.id}-p${pi}`}
-          song={mobileSongs[si]}
+          key={`m-${song.id}-p${pi}`}
+          song={song}
           pageIndex={pi}
-          totalPages={mobileSongs[si].pages.length}
+          totalPages={song.pages.length}
           absolutePageNum={mobileOffsets[si] + pi}
           compact
         />
@@ -149,15 +181,14 @@ export default function BookLayout() {
     ),
   ];
 
-  const totalDesktopPages = desktopPages.length;
-  const canPrev        = currentPage > 0;
-  const canNextDesktop = currentPage < totalDesktopPages - 2;
-  const canNextMobile  = currentPage < totalMobilePages - 1;
+  const canPrev         = currentPage > 0;
+  const canNextDesktop  = currentPage < totalDesktopPages - 2;
+  const canNextMobile   = currentPage < totalMobilePages - 1;
 
   return (
     <div
       className="relative flex flex-col items-center justify-center w-full min-h-screen"
-      style={{ background: isMobile ? '#F7F4DA' : '#ddbef7' }}
+      style={{ background: isMobile ? '#F7F4DA' : '#f0eaf8' }}
     >
 
       {isMobile ? (
@@ -210,7 +241,7 @@ export default function BookLayout() {
           {/* Spine */}
           <div
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-            style={{ width: 14, background: '#c4a0e8' }}
+            style={{ width: 7, background: '#c4a0e8' }}
           />
 
           {canPrev && (
@@ -251,49 +282,57 @@ export default function BookLayout() {
         </div>
       )}
 
-      {/* Mobile bottom nav bar */}
+      {/* Mobile ghost nav: small edge chevrons, no bar */}
       {isMobile && (
-        <div
-          className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-between"
-          style={{
-            height: MOBILE_NAV_H,
-            paddingLeft: 28,
-            paddingRight: 28,
-            background: '#F7F4DA',
-            borderTop: '1px solid #b090d0',
-            fontFamily: 'var(--font-wenkai)',
-          }}
-        >
+        <>
           <button
             onClick={() => flipRef.current?.pageFlip()?.flipPrev()}
             disabled={!canPrev}
             aria-label="上一頁"
             style={{
-              background: 'none', border: 'none',
+              position: 'fixed', left: 0, top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 15,
+              width: 28, height: 52,
+              background: canPrev ? 'rgba(196,160,232,0.28)' : 'transparent',
+              border: 'none',
               cursor: canPrev ? 'pointer' : 'default',
-              opacity: canPrev ? 1 : 0.25,
-              padding: '8px 4px',
-              fontSize: 18, color: '#2C2C2A', lineHeight: 1,
+              borderRadius: '0 26px 26px 0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: canPrev ? 1 : 0,
+              transition: 'opacity 0.2s',
+              fontFamily: 'var(--font-wenkai)',
             }}
-          >←</button>
-
-          <span style={{ fontSize: 10, color: '#B4B2A9', letterSpacing: '2px' }}>
-            {currentPage + 1}&thinsp;/&thinsp;{totalMobilePages}
-          </span>
+          >
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
+              <path d="M8 2 L2 9 L8 16" stroke="#9b59d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
 
           <button
             onClick={() => flipRef.current?.pageFlip()?.flipNext()}
             disabled={!canNextMobile}
             aria-label="下一頁"
             style={{
-              background: 'none', border: 'none',
+              position: 'fixed', right: 0, top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 15,
+              width: 28, height: 52,
+              background: canNextMobile ? 'rgba(196,160,232,0.28)' : 'transparent',
+              border: 'none',
               cursor: canNextMobile ? 'pointer' : 'default',
-              opacity: canNextMobile ? 1 : 0.25,
-              padding: '8px 4px',
-              fontSize: 18, color: '#2C2C2A', lineHeight: 1,
+              borderRadius: '26px 0 0 26px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: canNextMobile ? 1 : 0,
+              transition: 'opacity 0.2s',
+              fontFamily: 'var(--font-wenkai)',
             }}
-          >→</button>
-        </div>
+          >
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
+              <path d="M2 2 L8 9 L2 16" stroke="#9b59d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </>
       )}
 
       {/* 目錄 tab */}

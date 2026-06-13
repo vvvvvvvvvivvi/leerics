@@ -40,7 +40,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-wenkai);
-  background: #ddbef7;
+  background: #f0eaf8;
   color: var(--color-ink-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -55,12 +55,12 @@ body {
 
 /* ── Karaoke emphasis dots ── */
 .line-active {
-  -webkit-text-emphasis: dot #E24B4A;
+  -webkit-text-emphasis: filled circle #E24B4A;
   -webkit-text-emphasis-position: under left;
-  text-emphasis: dot #E24B4A;
+  text-emphasis: filled circle #E24B4A;
   text-emphasis-position: under left;
   color: var(--color-ink);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 38px;
 }
 
@@ -70,3 +70,4 @@ body {
 /* ── react-pageflip: solid page background during flip animation ── */
 .stf__parent { background: transparent !important; }
 .stf__block  { background: #F7F4DA !important; }
+.stf__page   { backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #F7F4DA; }

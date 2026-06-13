@@ -23,7 +23,7 @@ export default function PlayBar({ song, playState, position, duration, onToggle,
     <div
       className="absolute left-0 right-0 flex items-center gap-3"
       style={{
-        bottom: compact ? 52 : 0,
+        bottom: 0,
         height: 48,
         padding: '0 14px',
         borderTop: '1px dashed #D3D1C7',
