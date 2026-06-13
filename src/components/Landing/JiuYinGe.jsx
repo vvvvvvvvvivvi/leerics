@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import backImg from '../../assets/back.png';
+const backImg = `${import.meta.env.BASE_URL}assets/cover/back.png`;
 
 /**
  * JiuYinGe — scanned exercise-book back cover.

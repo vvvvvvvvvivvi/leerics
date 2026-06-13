@@ -69,4 +69,11 @@ body {
 /* ── react-pageflip: solid page background during flip animation ── */
 .stf__parent { background: transparent !important; }
 .stf__block  { background: #EDE8D0 !important; }
-.stf__page   { backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #EDE8D0; }
+.stf__page   {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background-color: #EDE8D0;
+  background-image: url('/leerics/assets/paper/L1.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+}

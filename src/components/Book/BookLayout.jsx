@@ -5,6 +5,7 @@ import MenuTab from './MenuTab';
 import CoverLeft from '../Landing/CoverLeft';
 import JiuYinGe from '../Landing/JiuYinGe';
 import SongSpread from '../Song/SongSpread';
+import BlankPage from '../Song/BlankPage';
 import NanoPlayer from '../Song/NanoPlayer';
 import { useViewport } from '../../hooks/useViewport';
 
@@ -16,11 +17,11 @@ const COMPACT_BOTTOM         = 56;  // PlayBar 48px + 8px gap
 const COMPACT_FIRST_HEADER_H = 80;
 const COMPACT_CONT_HEADER_H  = 25;
 
-// Desktop layout
+// Desktop layout — DESKTOP_PLAYBAR_RESERVE matches paddingBottom:28 (no PlayBar on desktop)
 const DESKTOP_RHYTHM          = 38;
-const DESKTOP_FIRST_HEADER_H  = 80;
-const DESKTOP_CONT_HEADER_H   = 30;
-const DESKTOP_PLAYBAR_RESERVE = 54;
+const DESKTOP_FIRST_HEADER_H  = 100; // paddingTop(28) + header block(~72)
+const DESKTOP_CONT_HEADER_H   = 48;  // paddingTop(28) + continuation label(~20)
+const DESKTOP_PLAYBAR_RESERVE = 28;  // matches paddingBottom:28 (no PlayBar)
 
 function splitSongPages(song, firstCap, contCap) {
   const allLines = song.pages.flat();
@@ -44,7 +45,7 @@ export default function BookLayout() {
   // ── Desktop book dimensions (dynamic, fills viewport height) ─────────────
   const desktopBookH = isMobile ? 0 : Math.min(
     Math.round(vh * 0.92),
-    Math.round((vw / 2 - 20) / PAGE_ASPECT), // cap by half-vw
+    Math.round((vw / 2 - 20) / PAGE_ASPECT),
     1000
   );
   const desktopBookW = isMobile ? 0 : Math.round(desktopBookH * PAGE_ASPECT);
@@ -79,11 +80,15 @@ export default function BookLayout() {
     pages: splitSongPages(song, desktopFirstCap, desktopContCap),
   }));
 
+  // Each song must start on an even absolute page (left page of a spread).
+  // Insert a blank page after any song whose page count is odd so the next
+  // song always starts on a left page — prevents two songs sharing one spread.
   const desktopOffsets = [];
-  let desktopOffset = 2; // 0 = cover, 1 = jiuyinge
+  let desktopOffset = 2; // 0=cover, 1=jiuyinge
   desktopSongs.forEach(song => {
     desktopOffsets.push(desktopOffset);
     desktopOffset += song.pages.length;
+    if (song.pages.length % 2 !== 0) desktopOffset += 1; // blank page gap
   });
   const totalDesktopPages = desktopOffset;
 
@@ -98,13 +103,15 @@ export default function BookLayout() {
     setActiveSongId(songId);
     setMenuOpen(false);
     const page = isMobile ? mobileOffsets[idx] : desktopOffsets[idx];
-    flipRef.current?.pageFlip()?.flip(page);
+    // rAF ensures the menu close re-render commits before flip fires
+    requestAnimationFrame(() => {
+      flipRef.current?.pageFlip()?.flip(page);
+    });
   };
 
   const goToCover = () => {
     setActiveSongId(null);
     setMenuOpen(false);
-    // rAF ensures menu re-render completes before flip fires
     requestAnimationFrame(() => {
       flipRef.current?.pageFlip()?.flip(0);
     });
@@ -153,17 +160,28 @@ export default function BookLayout() {
   const desktopPages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     <JiuYinGe  key="jiuyinge" />,
-    ...desktopSongs.flatMap((song, si) =>
-      song.pages.map((_, pi) => (
+    ...desktopSongs.flatMap((song, si) => {
+      const songPages = song.pages.map((_, pi) => (
         <SongSpread
           key={`d-${song.id}-p${pi}`}
           song={song}
           pageIndex={pi}
           totalPages={song.pages.length}
           absolutePageNum={desktopOffsets[si] + pi}
+          noPlayBar
         />
-      ))
-    ),
+      ));
+      // Odd page count → insert blank so next song starts on a left page
+      if (song.pages.length % 2 !== 0) {
+        songPages.push(
+          <BlankPage
+            key={`blank-${song.id}`}
+            absolutePageNum={desktopOffsets[si] + song.pages.length}
+          />
+        );
+      }
+      return songPages;
+    }),
   ];
 
   const mobilePages = [
@@ -248,7 +266,7 @@ export default function BookLayout() {
             {desktopPages}
           </HTMLFlipBook>
 
-          {/* Binding gutter shadow — organic darkening where pages curve into spine */}
+          {/* Binding gutter shadow */}
           <div
             className="absolute top-0 bottom-0 left-0 right-0 z-10 pointer-events-none"
             style={{
@@ -294,7 +312,7 @@ export default function BookLayout() {
             </button>
           )}
 
-          {/* iPod nano player — clips to right edge when a song is active */}
+          {/* iPod — bottom-right corner of the book, overlapping the right page */}
           {activeSong && (
             <NanoPlayer song={activeSong} />
           )}

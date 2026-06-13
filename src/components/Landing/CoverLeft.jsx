@@ -1,6 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { songs } from '../../data/songs';
-import frontImg from '../../assets/front.png';
+const frontImg = `${import.meta.env.BASE_URL}assets/cover/front.png`;
 
 /**
  * CoverLeft — scanned exercise-book cover.

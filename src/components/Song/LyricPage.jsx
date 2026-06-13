@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 import PlayBar from './PlayBar';
 import { useKaraoke } from '../../hooks/useKaraoke';
-import paperL1 from '../../assets/L1.png';
-import paperR1 from '../../assets/R1.png';
+const paperL1 = `${import.meta.env.BASE_URL}assets/paper/L1.png`;
+const paperR1 = `${import.meta.env.BASE_URL}assets/paper/R1.png`;
 
 const MARGIN = 32; // px — left margin rule position
 
@@ -10,7 +10,7 @@ const MARGIN = 32; // px — left margin rule position
 const COMPACT_BOTTOM_PAD = 56; // 48px playbar + 8px gap
 
 const LyricPage = forwardRef(function LyricPage(
-  { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
+  { song, pageIndex, totalPages, absolutePageNum, showHeader, compact, noPlayBar },
   ref
 ) {
   const { activeLineKey, playState, position, duration, toggle, seek } =
@@ -21,7 +21,7 @@ const LyricPage = forwardRef(function LyricPage(
 
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
-  const showPlayBar = isLastPage || compact;
+  const showPlayBar = !noPlayBar && (isLastPage || compact);
 
   // Odd absolutePageNum → L1 paper; even → R1 paper (alternates facing pages)
   const paperSrc = absolutePageNum % 2 === 1 ? paperL1 : paperR1;
@@ -39,7 +39,7 @@ const LyricPage = forwardRef(function LyricPage(
       ref={ref}
       className="relative w-full h-full overflow-hidden"
       style={{
-        background: '#EDE8D0',
+        backgroundColor: '#EDE8D0',
         backgroundImage: [
           // Margin rule (purple vertical line) sits on top
           `linear-gradient(90deg, transparent ${MARGIN}px, #C4A0E4 ${MARGIN}px, #C4A0E4 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)`,
@@ -83,9 +83,10 @@ const LyricPage = forwardRef(function LyricPage(
       <div
         className="flex flex-col h-full"
         style={{
+          paddingTop: compact ? 14 : 28,
           paddingLeft: MARGIN + 20,
           paddingRight: 28,
-          paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 12),
+          paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 28),
           position: 'relative',
           zIndex: 2,
         }}
@@ -93,7 +94,7 @@ const LyricPage = forwardRef(function LyricPage(
 
         {/* ── First-page header ─────────────────────────────────── */}
         {showHeader ? (
-          <div style={{ paddingTop: 10, flexShrink: 0 }}>
+          <div style={{ flexShrink: 0 }}>
             <div style={{ height: 2, background: '#9b59d4' }} />
 
             <div style={{ paddingTop: 4 }}>
@@ -135,7 +136,6 @@ const LyricPage = forwardRef(function LyricPage(
           </div>
         ) : (
           <div style={{
-            paddingTop: compact ? 6 : 10,
             fontSize: 10,
             color: '#B4B2A9',
             letterSpacing: '3px',
@@ -224,7 +224,7 @@ const LyricPage = forwardRef(function LyricPage(
             fontSize: 10,
             color: '#B4B2A9',
             letterSpacing: '3px',
-            paddingBottom: showPlayBar ? 58 : 5,
+            paddingBottom: showPlayBar ? 58 : 8,
             zIndex: 5,
           }}
         >
@@ -232,7 +232,7 @@ const LyricPage = forwardRef(function LyricPage(
         </div>
       )}
 
-      {/* Playbar */}
+      {/* Playbar — mobile only (desktop: lives in NanoPlayer) */}
       {showPlayBar && (
         <PlayBar
           song={song}

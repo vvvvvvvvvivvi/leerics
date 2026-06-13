@@ -1,5 +1,5 @@
 import { useKaraoke } from '../../hooks/useKaraoke';
-import ipodImg from '../../assets/ipod.png';
+const ipodImg = `${import.meta.env.BASE_URL}assets/play/ipod.png`;
 
 function fmt(sec) {
   if (!sec || isNaN(sec)) return '0:00';
@@ -11,9 +11,11 @@ function fmt(sec) {
 function stopBubble(e) { e.stopPropagation(); }
 
 /**
- * NanoPlayer — photographic iPod overlapping the right page.
- * ipod.png is the device body; a screen overlay sits at the correct percentage
- * position over the device photo for the live karaoke UI.
+ * NanoPlayer — photographic iPod resting in the bottom-right corner of the book.
+ * The device photo uses mix-blend-mode:screen so the black photo background
+ * disappears, leaving only the device sitting on the paper.
+ * The screen content (artist, title, scrubber, play/pause) is overlaid at the
+ * correct percentage position on the iPod photo.
  */
 export default function NanoPlayer({ song }) {
   const { playState, position, duration, toggle } = useKaraoke(song);
@@ -23,56 +25,62 @@ export default function NanoPlayer({ song }) {
     <div
       style={{
         position: 'absolute',
-        right: -14,
-        top: '58%',
-        transform: 'translateY(-50%) rotate(-4deg)',
+        right: 0,
+        bottom: 0,
+        width: 325,
         zIndex: 25,
-        width: 130,
         userSelect: 'none',
-        filter: 'drop-shadow(-5px 10px 18px rgba(0,0,0,0.50)) drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
+        // No filter here — filter creates a stacking context that breaks mix-blend-mode
       }}
       onMouseDown={stopBubble}
       onTouchStart={stopBubble}
     >
       <div style={{ position: 'relative', width: '100%' }}>
 
-        {/* Physical device photo */}
+        {/* Device photo. mix-blend-mode:screen makes the black background
+            transparent so the paper shows through underneath. */}
         <img
           src={ipodImg}
           alt="iPod"
-          style={{ width: '100%', display: 'block', pointerEvents: 'none' }}
+          style={{
+            width: '100%',
+            display: 'block',
+            pointerEvents: 'none',
+            mixBlendMode: 'screen',
+          }}
           draggable={false}
         />
 
-        {/* Screen overlay — layered over the device's actual screen area.
-            Percentages match the iPod classic screen position within the 1024×1024 photo. */}
+        {/* Screen overlay — positioned over the iPod's screen area.
+            Percentages calibrated to the iPod Classic in ipod.png (1024×1024).
+            Adjust top/left/right/height if your image has different margins. */}
         <div style={{
           position: 'absolute',
           top: '8%',
           left: '14%',
           right: '14%',
           height: '40%',
-          background: 'rgba(14,14,18,0.88)',
-          borderRadius: 3,
+          background: 'rgba(14,14,18,0.90)',
+          borderRadius: 4,
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          padding: '6px 7px 5px',
+          padding: '10px 12px 8px',
           boxSizing: 'border-box',
         }}>
           {/* Screen glare */}
           <div style={{
             position: 'absolute',
-            top: 0, left: 0, right: 0, height: '35%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)',
+            top: 0, left: 0, right: 0, height: '30%',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.07), transparent)',
             pointerEvents: 'none',
           }} />
 
           {/* Artist */}
           <div style={{
-            fontSize: 5.5,
-            color: '#999',
-            letterSpacing: '0.4px',
+            fontSize: 9,
+            color: '#888',
+            letterSpacing: '0.5px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -85,17 +93,17 @@ export default function NanoPlayer({ song }) {
 
           {/* Title */}
           <div style={{
-            fontSize: 8.5,
+            fontSize: 13,
             color: '#f2f2f2',
             fontWeight: 700,
-            letterSpacing: '0.4px',
+            letterSpacing: '0.5px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             lineHeight: 1.3,
             fontFamily: 'var(--font-wenkai)',
             flexShrink: 0,
-            marginTop: 1,
+            marginTop: 2,
             position: 'relative',
           }}>
             {song.title}
@@ -105,11 +113,11 @@ export default function NanoPlayer({ song }) {
 
           {/* Progress bar */}
           <div style={{
-            height: 2,
+            height: 3,
             background: '#2a2a2a',
-            borderRadius: 1,
+            borderRadius: 2,
             overflow: 'hidden',
-            marginBottom: 3,
+            marginBottom: 5,
             flexShrink: 0,
             position: 'relative',
           }}>
@@ -118,11 +126,11 @@ export default function NanoPlayer({ song }) {
               width: `${pct}%`,
               background: 'linear-gradient(90deg, #7c3aed, #9b59d4)',
               transition: 'width 0.3s linear',
-              borderRadius: 1,
+              borderRadius: 2,
             }} />
           </div>
 
-          {/* Time row */}
+          {/* Time + play/pause row */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -130,7 +138,7 @@ export default function NanoPlayer({ song }) {
             flexShrink: 0,
             position: 'relative',
           }}>
-            <span style={{ fontSize: 5, color: '#777', fontFamily: 'ui-monospace,monospace' }}>
+            <span style={{ fontSize: 8, color: '#666', fontFamily: 'ui-monospace,monospace' }}>
               {fmt(position)}
             </span>
             <button
@@ -140,15 +148,15 @@ export default function NanoPlayer({ song }) {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#ccc',
-                fontSize: 7,
+                color: '#bbb',
+                fontSize: 11,
                 padding: 0,
                 lineHeight: 1,
               }}
             >
               {playState === 'playing' ? '⏸' : '▶'}
             </button>
-            <span style={{ fontSize: 5, color: '#777', fontFamily: 'ui-monospace,monospace' }}>
+            <span style={{ fontSize: 8, color: '#666', fontFamily: 'ui-monospace,monospace' }}>
               {fmt(duration)}
             </span>
           </div>
@@ -160,10 +168,10 @@ export default function NanoPlayer({ song }) {
           aria-label={playState === 'playing' ? '暫停' : '播放'}
           style={{
             position: 'absolute',
-            bottom: '14%',
-            left: '20%',
-            right: '20%',
-            height: '26%',
+            top: '52%',
+            left: '18%',
+            right: '18%',
+            height: '30%',
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
