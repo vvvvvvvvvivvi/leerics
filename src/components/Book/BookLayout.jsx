@@ -19,9 +19,9 @@ const COMPACT_CONT_HEADER_H  = 25;
 
 // Desktop layout — DESKTOP_PLAYBAR_RESERVE matches paddingBottom:28 (no PlayBar on desktop)
 const DESKTOP_RHYTHM          = 38;
-const DESKTOP_FIRST_HEADER_H  = 100; // paddingTop(28) + header block(~72)
-const DESKTOP_CONT_HEADER_H   = 48;  // paddingTop(28) + continuation label(~20)
-const DESKTOP_PLAYBAR_RESERVE = 28;  // matches paddingBottom:28 (no PlayBar)
+const DESKTOP_FIRST_HEADER_H  = 116; // paddingTop(44) + header block(~72)
+const DESKTOP_CONT_HEADER_H   = 64;  // paddingTop(44) + continuation label(~20)
+const DESKTOP_PLAYBAR_RESERVE = 44;  // matches paddingBottom:44 (no PlayBar)
 
 function splitSongPages(song, firstCap, contCap) {
   const allLines = song.pages.flat();

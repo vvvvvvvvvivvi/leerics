@@ -99,10 +99,10 @@ const LyricPage = forwardRef(function LyricPage(
       <div
         className="flex flex-col h-full"
         style={{
-          paddingTop: compact ? 14 : 28,
+          paddingTop: compact ? 14 : 44,
           paddingLeft: MARGIN + 20,
           paddingRight: 28,
-          paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 28),
+          paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 44),
           position: 'relative',
           zIndex: 2,
         }}

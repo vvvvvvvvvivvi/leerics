@@ -59,7 +59,7 @@ export default function NanoPlayer({ song }) {
           top: '8%',
           left: '18%',
           right: '18%',
-          height: '32%',
+          height: '33%',
           background: 'rgba(14,14,18,0.90)',
           borderRadius: 4,
           overflow: 'hidden',
