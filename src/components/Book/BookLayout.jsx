@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { songs } from '../../data/songs';
 import MenuTab from './MenuTab';
@@ -97,25 +97,28 @@ export default function BookLayout() {
   const isMobileRef       = useRef(isMobile);       isMobileRef.current       = isMobile;
 
   // ── Navigation ───────────────────────────────────────────────────────────
-  const goToSong = (songId) => {
+  // useCallback with empty deps — read volatile values from refs so the
+  // function identity never changes, preventing page-array rememos on every render.
+  const goToSong = useCallback((songId) => {
     const idx = songs.findIndex(s => s.id === songId);
     if (idx === -1) return;
     setActiveSongId(songId);
     setMenuOpen(false);
-    const page = isMobile ? mobileOffsets[idx] : desktopOffsets[idx];
-    // rAF ensures the menu close re-render commits before flip fires
+    const page = isMobileRef.current
+      ? mobileOffsetsRef.current[idx]
+      : desktopOffsetsRef.current[idx];
     requestAnimationFrame(() => {
       flipRef.current?.pageFlip()?.flip(page);
     });
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const goToCover = () => {
+  const goToCover = useCallback(() => {
     setActiveSongId(null);
     setMenuOpen(false);
     requestAnimationFrame(() => {
       flipRef.current?.pageFlip()?.flip(0);
     });
-  };
+  }, []);
 
   const onFlip = (e) => {
     const p = e.data;
@@ -156,8 +159,9 @@ export default function BookLayout() {
     return () => window.removeEventListener('karaoke-page-change', handlePageChange);
   }, []);
 
-  // ── Page arrays ──────────────────────────────────────────────────────────
-  const desktopPages = [
+  // ── Page arrays — memoized so react-pageflip never receives new child
+  //    references when only UI state (menuOpen, activeSongId) changes.
+  const desktopPages = useMemo(() => [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     <JiuYinGe  key="jiuyinge" />,
     ...desktopSongs.flatMap((song, si) => {
@@ -171,7 +175,6 @@ export default function BookLayout() {
           noPlayBar
         />
       ));
-      // Odd page count → insert blank so next song starts on a left page
       if (song.pages.length % 2 !== 0) {
         songPages.push(
           <BlankPage
@@ -182,9 +185,9 @@ export default function BookLayout() {
       }
       return songPages;
     }),
-  ];
+  ], [desktopSongs, desktopOffsets, goToSong]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const mobilePages = [
+  const mobilePages = useMemo(() => [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     ...mobileSongs.flatMap((song, si) =>
       song.pages.map((_, pi) => (
@@ -198,7 +201,7 @@ export default function BookLayout() {
         />
       ))
     ),
-  ];
+  ], [mobileSongs, mobileOffsets, goToSong]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canPrev        = currentPage > 0;
   const canNextDesktop = currentPage < totalDesktopPages - 2;
