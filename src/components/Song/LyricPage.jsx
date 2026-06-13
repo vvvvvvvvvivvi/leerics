@@ -45,8 +45,8 @@ const LyricPage = forwardRef(function LyricPage(
       <div
         className="flex flex-col h-full"
         style={{
-          paddingLeft: MARGIN + 10,
-          paddingRight: 18,
+          paddingLeft: MARGIN + 20,
+          paddingRight: 28,
           paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 12),
         }}
       >
@@ -125,7 +125,7 @@ const LyricPage = forwardRef(function LyricPage(
                 <div
                   key={lineKey}
                   className="flex items-center gap-2"
-                  style={{ height: RHYTHM, lineHeight: `${RHYTHM}px` }}
+                  style={{ height: RHYTHM, lineHeight: `${RHYTHM}px`, marginTop: i > 0 ? 4 : 0 }}
                 >
                   <span style={{
                     flex: '0 0 16px', height: 1,

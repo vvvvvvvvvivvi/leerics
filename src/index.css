@@ -55,13 +55,12 @@ body {
 
 /* ── Karaoke emphasis dots ── */
 .line-active {
-  -webkit-text-emphasis: filled circle #E24B4A;
+  -webkit-text-emphasis: dot #E24B4A;
   -webkit-text-emphasis-position: under left;
-  text-emphasis: filled circle #E24B4A;
+  text-emphasis: dot #E24B4A;
   text-emphasis-position: under left;
   color: var(--color-ink);
   font-weight: 700;
-  line-height: 38px;
 }
 
 .line-sung   { color: var(--color-dimmed); }

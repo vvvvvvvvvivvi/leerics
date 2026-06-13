@@ -5,26 +5,23 @@ import MenuTab from './MenuTab';
 import CoverLeft from '../Landing/CoverLeft';
 import JiuYinGe from '../Landing/JiuYinGe';
 import SongSpread from '../Song/SongSpread';
+import NanoPlayer from '../Song/NanoPlayer';
 import { useViewport } from '../../hooks/useViewport';
 
-const BOOK_MAX_WIDTH  = 1200;
-const PAGE_ASPECT     = 0.707;
+const PAGE_ASPECT = 0.707; // width / height
 
-// Mobile layout constants (no bottom nav bar; PlayBar at bottom: 0)
+// Mobile layout (no bottom nav bar; PlayBar at bottom: 0)
 const MOBILE_RHYTHM          = 32;
 const COMPACT_BOTTOM         = 56;  // PlayBar 48px + 8px gap
 const COMPACT_FIRST_HEADER_H = 80;
 const COMPACT_CONT_HEADER_H  = 25;
 
-// Desktop layout constants
+// Desktop layout
 const DESKTOP_RHYTHM          = 38;
 const DESKTOP_FIRST_HEADER_H  = 80;
 const DESKTOP_CONT_HEADER_H   = 30;
-const DESKTOP_PLAYBAR_RESERVE = 54; // playbar height used conservatively for all pages
+const DESKTOP_PLAYBAR_RESERVE = 54;
 
-/**
- * Flatten all song lines and re-split so every page fits on screen.
- */
 function splitSongPages(song, firstCap, contCap) {
   const allLines = song.pages.flat();
   if (allLines.length === 0) return [[]];
@@ -44,6 +41,14 @@ export default function BookLayout() {
   const [menuOpen, setMenuOpen]         = useState(false);
   const { w: vw, h: vh, isMobile } = useViewport();
 
+  // ── Desktop book dimensions (dynamic, fills viewport height) ─────────────
+  const desktopBookH = isMobile ? 0 : Math.min(
+    Math.round(vh * 0.92),
+    Math.round((vw / 2 - 20) / PAGE_ASPECT), // cap by half-vw
+    1000
+  );
+  const desktopBookW = isMobile ? 0 : Math.round(desktopBookH * PAGE_ASPECT);
+
   // ── Mobile pagination ────────────────────────────────────────────────────
   const mobileFirstCap = Math.max(4, Math.floor((vh - COMPACT_FIRST_HEADER_H - COMPACT_BOTTOM) / MOBILE_RHYTHM));
   const mobileContCap  = Math.max(4, Math.floor((vh - COMPACT_CONT_HEADER_H  - COMPACT_BOTTOM) / MOBILE_RHYTHM));
@@ -54,7 +59,7 @@ export default function BookLayout() {
   }));
 
   const mobileOffsets = [];
-  let mobileOffset = 1; // page 0 = cover
+  let mobileOffset = 1;
   mobileSongs.forEach(song => {
     mobileOffsets.push(mobileOffset);
     mobileOffset += song.pages.length;
@@ -62,16 +67,11 @@ export default function BookLayout() {
   const totalMobilePages = mobileOffset;
 
   // ── Desktop pagination ───────────────────────────────────────────────────
-  // Estimate rendered page height from viewport width
-  const desktopPageH = Math.min(
-    Math.floor(Math.min(vw / 2, 600) / PAGE_ASPECT),
-    848
-  );
   const desktopFirstCap = Math.max(4, Math.floor(
-    (desktopPageH - DESKTOP_FIRST_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
+    (desktopBookH - DESKTOP_FIRST_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
   ));
   const desktopContCap = Math.max(4, Math.floor(
-    (desktopPageH - DESKTOP_CONT_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
+    (desktopBookH - DESKTOP_CONT_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
   ));
 
   const desktopSongs = songs.map(song => ({
@@ -80,14 +80,13 @@ export default function BookLayout() {
   }));
 
   const desktopOffsets = [];
-  let desktopOffset = 2; // page 0 = cover, page 1 = jiuyinge
+  let desktopOffset = 2; // 0 = cover, 1 = jiuyinge
   desktopSongs.forEach(song => {
     desktopOffsets.push(desktopOffset);
     desktopOffset += song.pages.length;
   });
   const totalDesktopPages = desktopOffset;
 
-  // Stable refs so event handlers always see latest values
   const mobileOffsetsRef  = useRef(mobileOffsets);  mobileOffsetsRef.current  = mobileOffsets;
   const desktopOffsetsRef = useRef(desktopOffsets); desktopOffsetsRef.current = desktopOffsets;
   const isMobileRef       = useRef(isMobile);       isMobileRef.current       = isMobile;
@@ -105,7 +104,10 @@ export default function BookLayout() {
   const goToCover = () => {
     setActiveSongId(null);
     setMenuOpen(false);
-    flipRef.current?.pageFlip()?.flip(0);
+    // rAF ensures menu re-render completes before flip fires
+    requestAnimationFrame(() => {
+      flipRef.current?.pageFlip()?.flip(0);
+    });
   };
 
   const onFlip = (e) => {
@@ -133,7 +135,6 @@ export default function BookLayout() {
     }
   };
 
-  // Auto page-turn: karaoke crosses a page boundary during playback
   useEffect(() => {
     function handlePageChange(e) {
       const { songId, pageIdx } = e.detail;
@@ -146,7 +147,7 @@ export default function BookLayout() {
     }
     window.addEventListener('karaoke-page-change', handlePageChange);
     return () => window.removeEventListener('karaoke-page-change', handlePageChange);
-  }, []); // stable — reads changing values via refs
+  }, []);
 
   // ── Page arrays ──────────────────────────────────────────────────────────
   const desktopPages = [
@@ -181,9 +182,11 @@ export default function BookLayout() {
     ),
   ];
 
-  const canPrev         = currentPage > 0;
-  const canNextDesktop  = currentPage < totalDesktopPages - 2;
-  const canNextMobile   = currentPage < totalMobilePages - 1;
+  const canPrev        = currentPage > 0;
+  const canNextDesktop = currentPage < totalDesktopPages - 2;
+  const canNextMobile  = currentPage < totalMobilePages - 1;
+
+  const activeSong = songs.find(s => s.id === activeSongId) ?? null;
 
   return (
     <div
@@ -213,18 +216,24 @@ export default function BookLayout() {
           </HTMLFlipBook>
         </div>
       ) : (
-        /* ── Desktop: two-page spread ──────────────────────────────────────── */
-        <div className="relative w-full" style={{ maxWidth: BOOK_MAX_WIDTH }}>
+        /* ── Desktop: two-page spread, fills viewport height ──────────────── */
+        <div
+          className="relative"
+          style={{
+            width: desktopBookW * 2 + 80, // extra 80px: 40px each side for nano + margin
+            maxWidth: '100vw',
+          }}
+        >
           <HTMLFlipBook
             ref={flipRef}
             key="desktop"
-            width={Math.floor(BOOK_MAX_WIDTH / 2)}
-            height={Math.floor(BOOK_MAX_WIDTH / 2 / PAGE_ASPECT)}
+            width={desktopBookW}
+            height={desktopBookH}
             size="stretch"
-            minWidth={300}
-            maxWidth={600}
-            minHeight={424}
-            maxHeight={848}
+            minWidth={280}
+            maxWidth={desktopBookW}
+            minHeight={400}
+            maxHeight={desktopBookH}
             showCover={false}
             flippingTime={700}
             usePortrait={false}
@@ -234,6 +243,7 @@ export default function BookLayout() {
             clickEventForward={true}
             onFlip={onFlip}
             className="mx-auto"
+            style={{ filter: 'drop-shadow(0 8px 28px rgba(0,0,0,0.18))' }}
           >
             {desktopPages}
           </HTMLFlipBook>
@@ -244,6 +254,7 @@ export default function BookLayout() {
             style={{ width: 7, background: '#c4a0e8' }}
           />
 
+          {/* Prev arrow */}
           {canPrev && (
             <button
               onClick={() => flipRef.current?.pageFlip()?.flipPrev()}
@@ -262,6 +273,7 @@ export default function BookLayout() {
             </button>
           )}
 
+          {/* Next arrow */}
           {canNextDesktop && (
             <button
               onClick={() => flipRef.current?.pageFlip()?.flipNext()}
@@ -279,10 +291,15 @@ export default function BookLayout() {
               </svg>
             </button>
           )}
+
+          {/* iPod nano player — clips to right edge when a song is active */}
+          {activeSong && (
+            <NanoPlayer song={activeSong} />
+          )}
         </div>
       )}
 
-      {/* Mobile ghost nav: small edge chevrons, no bar */}
+      {/* Mobile ghost nav: edge chevrons only (no bar) */}
       {isMobile && (
         <>
           <button
@@ -301,7 +318,6 @@ export default function BookLayout() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               opacity: canPrev ? 1 : 0,
               transition: 'opacity 0.2s',
-              fontFamily: 'var(--font-wenkai)',
             }}
           >
             <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
@@ -325,7 +341,6 @@ export default function BookLayout() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               opacity: canNextMobile ? 1 : 0,
               transition: 'opacity 0.2s',
-              fontFamily: 'var(--font-wenkai)',
             }}
           >
             <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
