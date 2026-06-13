@@ -2,7 +2,11 @@ import { forwardRef } from 'react';
 import PlayBar from './PlayBar';
 import { useKaraoke } from '../../hooks/useKaraoke';
 
-const MARGIN = 32; // px — red margin rule from left edge
+const MARGIN = 32; // px — left margin rule
+
+// On compact (mobile): PlayBar sits above the fixed nav bar (52px).
+// Content padding-bottom must clear PlayBar (48px) + nav bar (52px) + gap.
+const COMPACT_BOTTOM_PAD = 52 + 48 + 4; // 104px
 
 const LyricPage = forwardRef(function LyricPage(
   { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
@@ -16,7 +20,7 @@ const LyricPage = forwardRef(function LyricPage(
 
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
-  // PlayBar: every page on mobile (compact), only last page on desktop
+  // PlayBar: every page on compact (mobile), only last page on desktop
   const showPlayBar = isLastPage || compact;
 
   const activeLinkOnThisPage = lines.findIndex((_, li) =>
@@ -31,7 +35,7 @@ const LyricPage = forwardRef(function LyricPage(
         background: '#F7F4DA',
         backgroundImage: `
           linear-gradient(#E7E3C0 1px, transparent 1px),
-          linear-gradient(90deg, transparent ${MARGIN}px, #E8A0A0 ${MARGIN}px, #E8A0A0 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)
+          linear-gradient(90deg, transparent ${MARGIN}px, #d4a8f0 ${MARGIN}px, #d4a8f0 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)
         `,
         backgroundSize: `100% ${RHYTHM}px, 100% 100%`,
         border: '2px solid #b090d0',
@@ -43,19 +47,19 @@ const LyricPage = forwardRef(function LyricPage(
         style={{
           paddingLeft: MARGIN + 10,
           paddingRight: 18,
-          paddingBottom: showPlayBar ? 54 : 12,
+          paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 12),
         }}
       >
 
         {/* ── First-page header ─────────────────────────────────── */}
         {showHeader ? (
           <div style={{ paddingTop: 10, flexShrink: 0 }}>
-            <div style={{ height: 2, background: '#E24B4A', marginBottom: 0 }} />
+            <div style={{ height: 2, background: '#9b59d4' }} />
 
             <div style={{ paddingTop: 4 }}>
               <p style={{
                 fontSize: 11,
-                color: '#993C1D',
+                color: '#6b3fa0',
                 letterSpacing: '1.5px',
                 lineHeight: '19px',
                 margin: 0,
@@ -90,7 +94,6 @@ const LyricPage = forwardRef(function LyricPage(
             <div style={{ height: 1, background: '#b090d0', marginTop: 6 }} />
           </div>
         ) : (
-          /* Continuation pages: small running header */
           <div style={{
             paddingTop: compact ? 6 : 10,
             fontSize: 10,
@@ -103,14 +106,10 @@ const LyricPage = forwardRef(function LyricPage(
           </div>
         )}
 
-        {/* ── Lyrics ───────────────────────────────────────────── */}
+        {/* ── Lyrics ─────────────────────────────────────────────── */}
         <div
-          className="flex-1"
-          style={{
-            marginTop: showHeader ? 4 : 0,
-            overflowY: compact ? 'auto' : 'hidden',
-            WebkitOverflowScrolling: 'touch',
-          }}
+          className="flex-1 overflow-hidden"
+          style={{ marginTop: showHeader ? 4 : 0 }}
         >
           {lines.map((line, i) => {
             const lineKey  = `${song.id}-p${pageIndex}-l${i}`;
@@ -130,12 +129,12 @@ const LyricPage = forwardRef(function LyricPage(
                 >
                   <span style={{
                     flex: '0 0 16px', height: 1,
-                    background: '#E8A0A0',
+                    background: '#d4a8f0',
                     display: 'inline-block', marginBottom: 2,
                   }} />
                   <span style={{
                     fontSize: 10,
-                    color: '#993C1D',
+                    color: '#6b3fa0',
                     letterSpacing: '1.5px',
                     fontWeight: 500,
                     textTransform: 'uppercase',
@@ -164,18 +163,20 @@ const LyricPage = forwardRef(function LyricPage(
         </div>
       </div>
 
-      {/* Page number */}
-      <div
-        className="absolute bottom-0 left-0 right-0 text-center pointer-events-none"
-        style={{
-          fontSize: 10,
-          color: '#B4B2A9',
-          letterSpacing: '3px',
-          paddingBottom: showPlayBar ? 58 : 5,
-        }}
-      >
-        — {absolutePageNum} —
-      </div>
+      {/* Page number — desktop only; mobile shows indicator in nav bar */}
+      {!compact && (
+        <div
+          className="absolute bottom-0 left-0 right-0 text-center pointer-events-none"
+          style={{
+            fontSize: 10,
+            color: '#B4B2A9',
+            letterSpacing: '3px',
+            paddingBottom: showPlayBar ? 58 : 5,
+          }}
+        >
+          — {absolutePageNum} —
+        </div>
+      )}
 
       {/* Playbar */}
       {showPlayBar && (
@@ -186,6 +187,7 @@ const LyricPage = forwardRef(function LyricPage(
           duration={duration}
           onToggle={toggle}
           onSeek={seek}
+          compact={compact}
         />
       )}
     </div>

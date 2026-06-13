@@ -16,13 +16,14 @@ function stopBubble(e) {
   e.stopPropagation();
 }
 
-export default function PlayBar({ song, playState, position, duration, onToggle, onSeek }) {
+export default function PlayBar({ song, playState, position, duration, onToggle, onSeek, compact }) {
   const pct = duration > 0 ? Math.min((position / duration) * 100, 100) : 0;
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 flex items-center gap-3"
+      className="absolute left-0 right-0 flex items-center gap-3"
       style={{
+        bottom: compact ? 52 : 0,
         height: 48,
         padding: '0 14px',
         borderTop: '1px dashed #D3D1C7',
@@ -66,12 +67,12 @@ export default function PlayBar({ song, playState, position, duration, onToggle,
         <div className="absolute rounded-full" style={{
           height: 4, top: '50%', transform: 'translateY(-50%)',
           left: 0, width: `${pct}%`,
-          background: '#E24B4A',
+          background: '#9b59d4',
           transition: 'width 0.25s linear',
         }} />
         <div className="absolute" style={{
           width: 11, height: 11, borderRadius: '50%',
-          background: '#E24B4A',
+          background: '#9b59d4',
           top: '50%', left: `${pct}%`,
           transform: 'translate(-50%, -50%)',
           transition: 'left 0.25s linear',

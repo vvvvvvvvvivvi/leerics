@@ -14,10 +14,10 @@
   --color-muted:         #5F5E5A;
   --color-muted-light:   #888780;
   --color-dimmed:        #B4B2A9;
-  --color-accent:        #E24B4A;
-  --color-accent-dark:   #A32D2D;
-  --color-section:       #993C1D;
-  --color-margin-rule:   #E8A0A0;
+  --color-accent:        #9b59d4;
+  --color-accent-dark:   #6b3fa0;
+  --color-section:       #6b3fa0;
+  --color-margin-rule:   #d4a8f0;
 
   /* ── Typography ── */
   --font-wenkai: 'LXGW WenKai', 'Noto Sans TC', sans-serif;

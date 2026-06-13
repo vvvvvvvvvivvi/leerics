@@ -51,7 +51,7 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
           onClick={() => onStickerClick(song.id)}
           onMouseDown={e => e.stopPropagation()}
           onTouchStart={e => e.stopPropagation()}
-          className="absolute cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E24B4A] rounded"
+          className="absolute cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#9b59d4] rounded"
           style={{
             top: song.stickerPos.top,
             left: song.stickerPos.left,

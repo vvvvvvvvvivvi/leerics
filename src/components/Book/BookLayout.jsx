@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { songs } from '../../data/songs';
 import MenuTab from './MenuTab';
@@ -7,9 +7,31 @@ import JiuYinGe from '../Landing/JiuYinGe';
 import SongSpread from '../Song/SongSpread';
 import { useViewport } from '../../hooks/useViewport';
 
-const BOOK_MAX_WIDTH = 1200;
-const PAGE_ASPECT    = 0.707; // portrait ratio
-const MOBILE_NAV_H   = 52;    // fixed bottom nav bar on mobile
+const BOOK_MAX_WIDTH  = 1200;
+const PAGE_ASPECT     = 0.707;
+const MOBILE_NAV_H    = 52;
+const MOBILE_RHYTHM   = 32;
+// Content must clear PlayBar (48px above nav bar) + nav bar (52px) + gap (4px)
+const COMPACT_BOTTOM  = 104;
+// Approximate pixel heights for the two header types in compact mode
+const COMPACT_FIRST_HEADER_H = 80; // rule + credit + title + divider + margins
+const COMPACT_CONT_HEADER_H  = 25; // paddingTop + running-title lineHeight
+
+/**
+ * Flatten all song lines and re-split so every mobile page fits on screen.
+ * Returns a new pages array whose length may differ from the original two pages.
+ */
+function splitSongForMobile(song, firstCap, contCap) {
+  const allLines = song.pages.flat();
+  if (allLines.length === 0) return [[]];
+  const pages = [allLines.slice(0, firstCap)];
+  let start = firstCap;
+  while (start < allLines.length) {
+    pages.push(allLines.slice(start, start + contCap));
+    start += contCap;
+  }
+  return pages;
+}
 
 export default function BookLayout() {
   const flipRef = useRef(null);
@@ -18,48 +40,83 @@ export default function BookLayout() {
   const [menuOpen, setMenuOpen]         = useState(false);
   const { w: vw, h: vh, isMobile } = useViewport();
 
-  // Desktop: 0=cover, 1=九因歌, 2+= song pages
-  // Mobile:  0=cover,           1+= song pages  (九因歌 hidden)
-  const pageOffset = isMobile ? 1 : 2;
+  // ── Mobile pagination ────────────────────────────────────────────────────
+  // How many lines fit per page type (floor so content never overflows)
+  const firstCap = Math.max(4, Math.floor((vh - COMPACT_FIRST_HEADER_H - COMPACT_BOTTOM) / MOBILE_RHYTHM));
+  const contCap  = Math.max(4, Math.floor((vh - COMPACT_CONT_HEADER_H  - COMPACT_BOTTOM) / MOBILE_RHYTHM));
 
-  const goToSong = useCallback((songId) => {
+  // Re-paginated songs for mobile; desktop songs are unchanged
+  const mobileSongs = songs.map(song => ({
+    ...song,
+    pages: splitSongForMobile(song, firstCap, contCap),
+  }));
+
+  // mobileOffsets[i] = flip-page index of songs[i]'s first lyric page
+  // page 0 = cover; song pages follow immediately (no 九因歌 on mobile)
+  const mobileOffsets = [];
+  let mobileOffset = 1;
+  mobileSongs.forEach(song => {
+    mobileOffsets.push(mobileOffset);
+    mobileOffset += song.pages.length;
+  });
+  const totalMobilePages = mobileOffset;
+
+  // Keep refs so the stable event handler always sees the latest values
+  const mobileOffsetsRef = useRef(mobileOffsets);
+  mobileOffsetsRef.current = mobileOffsets;
+  const isMobileRef = useRef(isMobile);
+  isMobileRef.current = isMobile;
+
+  // ── Navigation ───────────────────────────────────────────────────────────
+  const goToSong = (songId) => {
     const idx = songs.findIndex(s => s.id === songId);
     if (idx === -1) return;
     setActiveSongId(songId);
     setMenuOpen(false);
-    flipRef.current?.pageFlip()?.flip(pageOffset + idx * 2);
-  }, [pageOffset]);
+    const page = isMobile ? mobileOffsets[idx] : (2 + idx * 2);
+    flipRef.current?.pageFlip()?.flip(page);
+  };
 
-  const goToCover = useCallback(() => {
+  const goToCover = () => {
     setActiveSongId(null);
     setMenuOpen(false);
     flipRef.current?.pageFlip()?.flip(0);
-  }, []);
+  };
 
-  const onFlip = useCallback((e) => {
+  const onFlip = (e) => {
     const p = e.data;
     setCurrentPage(p);
-    if (p < pageOffset) {
-      setActiveSongId(null);
-    } else {
-      setActiveSongId(songs[Math.floor((p - pageOffset) / 2)]?.id ?? null);
-    }
-  }, [pageOffset]);
 
-  // Auto page-turn when karaoke active line crosses a page boundary
+    if (!isMobileRef.current) {
+      setActiveSongId(p < 2 ? null : (songs[Math.floor((p - 2) / 2)]?.id ?? null));
+      return;
+    }
+    if (p === 0) { setActiveSongId(null); return; }
+    const offs = mobileOffsetsRef.current;
+    let found = null;
+    for (let i = 0; i < songs.length; i++) {
+      const end = i < songs.length - 1 ? offs[i + 1] : Infinity;
+      if (p >= offs[i] && p < end) { found = songs[i].id; break; }
+    }
+    setActiveSongId(found);
+  };
+
+  // Auto page-turn: karaoke crosses a page boundary during playback
   useEffect(() => {
     function handlePageChange(e) {
       const { songId, pageIdx } = e.detail;
       const songIdx = songs.findIndex(s => s.id === songId);
       if (songIdx === -1) return;
-      const targetPage = pageOffset + songIdx * 2 + pageIdx;
+      const targetPage = isMobileRef.current
+        ? (mobileOffsetsRef.current[songIdx] ?? 0) + pageIdx
+        : 2 + songIdx * 2 + pageIdx;
       flipRef.current?.pageFlip()?.flip(targetPage);
     }
     window.addEventListener('karaoke-page-change', handlePageChange);
     return () => window.removeEventListener('karaoke-page-change', handlePageChange);
-  }, [pageOffset]);
+  }, []); // stable — reads isMobile and offsets via refs
 
-  // Desktop page array: cover + 九因歌 + all song pages
+  // ── Page arrays ──────────────────────────────────────────────────────────
   const desktopPages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     <JiuYinGe  key="jiuyinge"   onSongClick={goToSong} />,
@@ -76,31 +133,26 @@ export default function BookLayout() {
     ),
   ];
 
-  // Mobile page array: cover only + song pages (九因歌 omitted)
   const mobilePages = [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
     ...songs.flatMap((song, si) =>
-      song.pages.map((_, pi) => (
+      mobileSongs[si].pages.map((_, pi) => (
         <SongSpread
           key={`${song.id}-p${pi}`}
-          song={song}
+          song={mobileSongs[si]}
           pageIndex={pi}
-          totalPages={song.pages.length}
-          absolutePageNum={1 + si * 2 + pi}
+          totalPages={mobileSongs[si].pages.length}
+          absolutePageNum={mobileOffsets[si] + pi}
           compact
         />
       ))
     ),
   ];
 
-  const totalPagesDesktop = desktopPages.length;
-  const totalPagesMobile  = mobilePages.length;
-  const canPrev           = currentPage > 0;
-  const canNextDesktop    = currentPage < totalPagesDesktop - 2;
-  const canNextMobile     = currentPage < totalPagesMobile - 1;
-
-  // Mobile page height: full viewport minus bottom nav bar
-  const mobilePageH = Math.max(400, vh - MOBILE_NAV_H);
+  const totalDesktopPages = desktopPages.length;
+  const canPrev        = currentPage > 0;
+  const canNextDesktop = currentPage < totalDesktopPages - 2;
+  const canNextMobile  = currentPage < totalMobilePages - 1;
 
   return (
     <div
@@ -109,13 +161,13 @@ export default function BookLayout() {
     >
 
       {isMobile ? (
-        /* ── Mobile: one page at a time, portrait flipbook ──────────────── */
-        <div className="relative w-full" style={{ height: mobilePageH, overflow: 'hidden' }}>
+        /* ── Mobile: full-screen single-page flipbook ─────────────────────── */
+        <div className="relative w-full" style={{ height: vh, overflow: 'hidden' }}>
           <HTMLFlipBook
             ref={flipRef}
             key="mobile"
             width={vw}
-            height={mobilePageH}
+            height={vh}
             size="fixed"
             usePortrait={true}
             showCover={false}
@@ -130,7 +182,7 @@ export default function BookLayout() {
           </HTMLFlipBook>
         </div>
       ) : (
-        /* ── Desktop: two-page spread ─────────────────────────────────────── */
+        /* ── Desktop: two-page spread ──────────────────────────────────────── */
         <div className="relative w-full" style={{ maxWidth: BOOK_MAX_WIDTH }}>
           <HTMLFlipBook
             ref={flipRef}
@@ -161,7 +213,6 @@ export default function BookLayout() {
             style={{ width: 14, background: '#c4a0e8' }}
           />
 
-          {/* ← desktop arrow */}
           {canPrev && (
             <button
               onClick={() => flipRef.current?.pageFlip()?.flipPrev()}
@@ -180,7 +231,6 @@ export default function BookLayout() {
             </button>
           )}
 
-          {/* → desktop arrow */}
           {canNextDesktop && (
             <button
               onClick={() => flipRef.current?.pageFlip()?.flipNext()}
@@ -223,15 +273,12 @@ export default function BookLayout() {
               cursor: canPrev ? 'pointer' : 'default',
               opacity: canPrev ? 1 : 0.25,
               padding: '8px 4px',
-              fontSize: 18, color: '#2C2C2A',
-              lineHeight: 1,
+              fontSize: 18, color: '#2C2C2A', lineHeight: 1,
             }}
-          >
-            ←
-          </button>
+          >←</button>
 
           <span style={{ fontSize: 10, color: '#B4B2A9', letterSpacing: '2px' }}>
-            {currentPage + 1}&thinsp;/&thinsp;{totalPagesMobile}
+            {currentPage + 1}&thinsp;/&thinsp;{totalMobilePages}
           </span>
 
           <button
@@ -243,12 +290,9 @@ export default function BookLayout() {
               cursor: canNextMobile ? 'pointer' : 'default',
               opacity: canNextMobile ? 1 : 0.25,
               padding: '8px 4px',
-              fontSize: 18, color: '#2C2C2A',
-              lineHeight: 1,
+              fontSize: 18, color: '#2C2C2A', lineHeight: 1,
             }}
-          >
-            →
-          </button>
+          >→</button>
         </div>
       )}
 

@@ -151,7 +151,7 @@ const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
                       letterSpacing: '0.5px',
                       textDecoration: 'none',
                     }}
-                    className="hover:text-[#E24B4A] transition-colors"
+                    className="hover:text-[#9b59d4] transition-colors"
                   >
                     {song.title}
                   </button>

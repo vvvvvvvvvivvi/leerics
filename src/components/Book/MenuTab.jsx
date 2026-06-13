@@ -12,7 +12,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
-          background: '#E24B4A',
+          background: '#9b59d4',
           color: '#fff',
           fontFamily: 'var(--font-wenkai)',
           fontSize: 13,
@@ -104,7 +104,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
               >
                 <span style={{
                   fontSize: 10,
-                  color: isActive ? '#E24B4A' : '#b090d0',
+                  color: isActive ? '#9b59d4' : '#b090d0',
                   fontVariantNumeric: 'tabular-nums',
                   letterSpacing: '1px',
                   flexShrink: 0,
@@ -113,7 +113,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
                 }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span style={{ fontSize: 13, color: isActive ? '#E24B4A' : '#3A3A37', fontWeight: isActive ? 600 : 400 }}>
+                <span style={{ fontSize: 13, color: isActive ? '#9b59d4' : '#3A3A37', fontWeight: isActive ? 600 : 400 }}>
                   {song.title}
                   {song.subtitle && (
                     <span style={{ display: 'block', fontSize: 10, color: '#888780', fontWeight: 400, marginTop: 1 }}>
@@ -122,7 +122,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
                   )}
                 </span>
                 {isActive && (
-                  <span style={{ marginLeft: 'auto', color: '#E24B4A', fontSize: 10, flexShrink: 0 }}>▶</span>
+                  <span style={{ marginLeft: 'auto', color: '#9b59d4', fontSize: 10, flexShrink: 0 }}>▶</span>
                 )}
               </button>
             );
