@@ -57,9 +57,9 @@ export default function NanoPlayer({ song }) {
         <div style={{
           position: 'absolute',
           top: '8%',
-          left: '14%',
-          right: '14%',
-          height: '40%',
+          left: '18%',
+          right: '18%',
+          height: '32%',
           background: 'rgba(14,14,18,0.90)',
           borderRadius: 4,
           overflow: 'hidden',
