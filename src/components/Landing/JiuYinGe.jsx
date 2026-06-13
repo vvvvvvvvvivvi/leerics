@@ -47,12 +47,24 @@ const JiuYinGe = forwardRef(function JiuYinGe({ onSongClick }, ref) {
       ref={ref}
       className="relative w-full h-full overflow-hidden flex flex-col"
       style={{
-        background: '#F7F4DA',
+        background: '#EDE8D0',
         /* Double border via box-shadow to avoid layout impact */
-        boxShadow: 'inset 0 0 0 3px #1a1a18, inset 0 0 0 6px #F7F4DA, inset 0 0 0 9px #1a1a18',
+        boxShadow: 'inset 0 0 0 3px #2a2a28, inset 0 0 0 6px #EDE8D0, inset 0 0 0 9px #2a2a28',
         fontFamily: 'var(--font-wenkai)',
       }}
     >
+      {/* Scanner gutter shadow — jiuyinge is right page so shadow on left edge */}
+      <div style={{
+        position: 'absolute', top: 0, bottom: 0, left: 0, width: 64, zIndex: 8,
+        background: 'linear-gradient(to right, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.06) 45%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
+      {/* Edge vignette */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 7,
+        background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.06) 100%)',
+        pointerEvents: 'none',
+      }} />
       {/* Header block ─ 歌因九 — full-width, double-border, centred */}
       <div
         className="flex items-center justify-center mx-4 mt-4"

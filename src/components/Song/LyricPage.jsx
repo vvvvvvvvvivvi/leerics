@@ -2,11 +2,13 @@ import { forwardRef } from 'react';
 import PlayBar from './PlayBar';
 import { useKaraoke } from '../../hooks/useKaraoke';
 
-const MARGIN = 32; // px — left margin rule
+const MARGIN = 32; // px — left margin rule position
 
-// On compact (mobile): PlayBar sits at bottom: 0 (no nav bar).
-// Content padding-bottom must clear PlayBar (48px) + gap.
+// Mobile: PlayBar at bottom:0; content needs clearance
 const COMPACT_BOTTOM_PAD = 56; // 48px playbar + 8px gap
+
+// SVG paper grain — subtle fractal noise tiled at 300×300
+const GRAIN_URL = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.048'/%3E%3C/svg%3E\")";
 
 const LyricPage = forwardRef(function LyricPage(
   { song, pageIndex, totalPages, absolutePageNum, showHeader, compact },
@@ -20,8 +22,11 @@ const LyricPage = forwardRef(function LyricPage(
 
   const lines      = song.pages[pageIndex] ?? [];
   const isLastPage = pageIndex === totalPages - 1;
-  // PlayBar: every page on compact (mobile), only last page on desktop
   const showPlayBar = isLastPage || compact;
+
+  // Scanner aesthetic: even absolutePageNum = left page (gutter on right)
+  //                    odd  absolutePageNum = right page (gutter on left)
+  const isRightPage = absolutePageNum % 2 === 1;
 
   const activeLinkOnThisPage = lines.findIndex((_, li) =>
     `${song.id}-p${pageIndex}-l${li}` === activeLineKey
@@ -32,31 +37,76 @@ const LyricPage = forwardRef(function LyricPage(
       ref={ref}
       className="relative w-full h-full overflow-hidden"
       style={{
-        background: '#F7F4DA',
-        backgroundImage: `
-          linear-gradient(#E7E3C0 1px, transparent 1px),
-          linear-gradient(90deg, transparent ${MARGIN}px, #d4a8f0 ${MARGIN}px, #d4a8f0 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)
-        `,
-        backgroundSize: `100% ${RHYTHM}px, 100% 100%`,
-        border: '2px solid #b090d0',
+        background: '#EDE8D0',
+        backgroundImage: [
+          GRAIN_URL,
+          `linear-gradient(#D4C9A8 1px, transparent 1px)`,
+          `linear-gradient(90deg, transparent ${MARGIN}px, #C4A0E4 ${MARGIN}px, #C4A0E4 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)`,
+        ].join(', '),
+        backgroundSize: `300px 300px, 100% ${RHYTHM}px, 100% 100%`,
+        border: '1px solid rgba(160,120,200,0.18)',
         fontFamily: 'var(--font-wenkai)',
       }}
     >
+      {/* Scanner gutter shadow — desktop only */}
+      {!compact && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0, bottom: 0,
+            [isRightPage ? 'left' : 'right']: 0,
+            width: 64,
+            background: `linear-gradient(to ${isRightPage ? 'right' : 'left'},
+              rgba(0,0,0,0.14) 0%,
+              rgba(0,0,0,0.06) 45%,
+              transparent 100%)`,
+            pointerEvents: 'none',
+            zIndex: 4,
+          }}
+        />
+      )}
+
+      {/* Subtle page-edge vignette (scanner corner loss) */}
+      {!compact && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.06) 100%)',
+          pointerEvents: 'none',
+          zIndex: 3,
+        }} />
+      )}
+
       <div
         className="flex flex-col h-full"
         style={{
           paddingLeft: MARGIN + 20,
           paddingRight: 28,
           paddingBottom: compact ? COMPACT_BOTTOM_PAD : (showPlayBar ? 54 : 12),
+          position: 'relative',
+          zIndex: 2,
         }}
       >
 
         {/* ── First-page header ─────────────────────────────────── */}
         {showHeader ? (
-          <div style={{ paddingTop: 10, flexShrink: 0 }}>
-            <div style={{ height: 2, background: '#9b59d4' }} />
+          <div style={{ paddingTop: 10, flexShrink: 0, position: 'relative' }}>
 
-            <div style={{ paddingTop: 4 }}>
+            {/* Washi tape strip across the header */}
+            <div style={{
+              position: 'absolute',
+              top: 14,
+              left: -(MARGIN + 20),
+              width: '65%',
+              height: 15,
+              background: 'repeating-linear-gradient(90deg, rgba(160,200,155,0.38) 0px, rgba(155,195,150,0.33) 4px, rgba(170,210,165,0.32) 4px, rgba(160,200,155,0.36) 8px)',
+              transform: 'rotate(-0.6deg)',
+              borderRadius: '1px 2px 2px 1px',
+              pointerEvents: 'none',
+            }} />
+
+            <div style={{ height: 2, background: '#9b59d4', position: 'relative', zIndex: 1 }} />
+
+            <div style={{ paddingTop: 4, position: 'relative', zIndex: 1 }}>
               <p style={{
                 fontSize: 11,
                 color: '#6b3fa0',
@@ -91,7 +141,7 @@ const LyricPage = forwardRef(function LyricPage(
               </h1>
             </div>
 
-            <div style={{ height: 1, background: '#b090d0', marginTop: 6 }} />
+            <div style={{ height: 1, background: '#A890C8', marginTop: 6, position: 'relative', zIndex: 1 }} />
           </div>
         ) : (
           <div style={{
@@ -129,7 +179,7 @@ const LyricPage = forwardRef(function LyricPage(
                 >
                   <span style={{
                     flex: '0 0 16px', height: 1,
-                    background: '#d4a8f0',
+                    background: '#C4A0E4',
                     display: 'inline-block', marginBottom: 2,
                   }} />
                   <span style={{
@@ -168,10 +218,11 @@ const LyricPage = forwardRef(function LyricPage(
         <div
           className="absolute left-0 right-0 text-center pointer-events-none"
           style={{
-            bottom: 52, // above the 48px playbar + 4px gap
+            bottom: 52,
             fontSize: 9,
             color: '#B4B2A9',
             letterSpacing: '3px',
+            zIndex: 2,
           }}
         >
           — {absolutePageNum} —
@@ -184,6 +235,7 @@ const LyricPage = forwardRef(function LyricPage(
             color: '#B4B2A9',
             letterSpacing: '3px',
             paddingBottom: showPlayBar ? 58 : 5,
+            zIndex: 5,
           }}
         >
           — {absolutePageNum} —

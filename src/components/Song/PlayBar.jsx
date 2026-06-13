@@ -27,7 +27,7 @@ export default function PlayBar({ song, playState, position, duration, onToggle,
         height: 48,
         padding: '0 14px',
         borderTop: '1px dashed #D3D1C7',
-        background: '#F7F4DA',
+        background: '#EDE8D0',
         fontFamily: 'var(--font-wenkai)',
         zIndex: 5,
       }}

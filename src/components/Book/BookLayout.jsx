@@ -191,7 +191,7 @@ export default function BookLayout() {
   return (
     <div
       className="relative flex flex-col items-center justify-center w-full min-h-screen"
-      style={{ background: isMobile ? '#F7F4DA' : '#f0eaf8' }}
+      style={{ background: isMobile ? '#EDE8D0' : '#E0D8C8' }}
     >
 
       {isMobile ? (
@@ -220,7 +220,7 @@ export default function BookLayout() {
         <div
           className="relative"
           style={{
-            width: desktopBookW * 2 + 80, // extra 80px: 40px each side for nano + margin
+            width: desktopBookW * 2,
             maxWidth: '100vw',
           }}
         >
@@ -243,7 +243,7 @@ export default function BookLayout() {
             clickEventForward={true}
             onFlip={onFlip}
             className="mx-auto"
-            style={{ filter: 'drop-shadow(0 8px 28px rgba(0,0,0,0.18))' }}
+            style={{ filter: 'drop-shadow(0 10px 32px rgba(0,0,0,0.22)) drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }}
           >
             {desktopPages}
           </HTMLFlipBook>
@@ -251,7 +251,7 @@ export default function BookLayout() {
           {/* Spine */}
           <div
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-            style={{ width: 7, background: '#c4a0e8' }}
+            style={{ width: 7, background: '#B898D8' }}
           />
 
           {/* Prev arrow */}

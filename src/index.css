@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Colour tokens ── */
-  --color-paper:         #F7F4DA;
-  --color-cover-yellow:  #ead4fb;
-  --color-ruled:         #E7E3C0;
-  --color-playbar-track: #E5E1BE;
-  --color-spine:         #c4a0e8;
-  --color-page-border:   #b090d0;
+  /* ── Colour tokens — aged scanned palette ── */
+  --color-paper:         #EDE8D0;   /* aged cream, was #F7F4DA */
+  --color-cover-yellow:  #E0CCEC;   /* muted lavender */
+  --color-ruled:         #D4C9A8;   /* faint warm ruled lines */
+  --color-playbar-track: #D8CFA8;
+  --color-spine:         #B898D8;   /* muted violet */
+  --color-page-border:   #A890C8;   /* muted, was #b090d0 */
   --color-ink:           #2C2C2A;
   --color-ink-body:      #3A3A37;
   --color-ink-alt:       #444441;
@@ -17,7 +17,7 @@
   --color-accent:        #9b59d4;
   --color-accent-dark:   #6b3fa0;
   --color-section:       #6b3fa0;
-  --color-margin-rule:   #d4a8f0;
+  --color-margin-rule:   #C4A0E4;   /* muted lilac ink, was #d4a8f0 */
 
   /* ── Typography ── */
   --font-wenkai: 'LXGW WenKai', 'Noto Sans TC', sans-serif;
@@ -40,7 +40,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-wenkai);
-  background: #f0eaf8;
+  background: #E0D8C8;  /* warm scanner/desk surface */
   color: var(--color-ink-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -68,5 +68,5 @@ body {
 
 /* ── react-pageflip: solid page background during flip animation ── */
 .stf__parent { background: transparent !important; }
-.stf__block  { background: #F7F4DA !important; }
-.stf__page   { backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #F7F4DA; }
+.stf__block  { background: #EDE8D0 !important; }
+.stf__page   { backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #EDE8D0; }

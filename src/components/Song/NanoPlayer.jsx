@@ -21,11 +21,12 @@ export default function NanoPlayer({ song }) {
     <div
       style={{
         position: 'absolute',
-        right: 0,
-        top: '38%',
-        transform: 'translateY(-50%) rotate(2deg)',
+        right: 18,
+        top: '62%',
+        transform: 'translateY(-50%) rotate(3deg)',
         zIndex: 25,
-        filter: 'drop-shadow(-3px 5px 14px rgba(0,0,0,0.28))',
+        /* Larger shadow so it looks physically resting on the page */
+        filter: 'drop-shadow(-2px 6px 10px rgba(0,0,0,0.35)) drop-shadow(0 2px 3px rgba(0,0,0,0.20))',
         userSelect: 'none',
       }}
       onMouseDown={stopBubble}

@@ -14,8 +14,20 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
     <div
       ref={ref}
       className="relative w-full h-full overflow-hidden select-none"
-      style={{ background: '#ead4fb', border: '2px solid #b090d0' }}
+      style={{ background: '#E0CCEC', border: '1px solid rgba(160,120,200,0.2)' }}
     >
+      {/* Scanner gutter shadow — cover is left page so shadow on right edge */}
+      <div style={{
+        position: 'absolute', top: 0, bottom: 0, right: 0, width: 64, zIndex: 8,
+        background: 'linear-gradient(to left, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.06) 45%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
+      {/* Edge vignette */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 7,
+        background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.06) 100%)',
+        pointerEvents: 'none',
+      }} />
       {/* Scanned cover */}
       {!imgError ? (
         <img
