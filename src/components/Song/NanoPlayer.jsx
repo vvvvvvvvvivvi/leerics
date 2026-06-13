@@ -24,11 +24,11 @@ export default function NanoPlayer({ song }) {
   return (
     <div
       style={{
-        position: 'absolute',
+        position: 'fixed',
         right: 0,
         bottom: 0,
-        width: 325,
-        zIndex: 25,
+        width: 217,
+        zIndex: 9999,
         userSelect: 'none',
         // No filter here — filter creates a stacking context that breaks mix-blend-mode
       }}
