@@ -59,14 +59,7 @@ const LyricPage = forwardRef(function LyricPage(
         }}
       />
 
-      {/* Margin rule */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', top: 0, bottom: 0,
-        left: MARGIN, width: 1,
-        background: '#C4A0E4',
-        zIndex: 1,
-        pointerEvents: 'none',
-      }} />
+
 
       {/* Scanner gutter shadow — desktop only */}
       {!compact && (
