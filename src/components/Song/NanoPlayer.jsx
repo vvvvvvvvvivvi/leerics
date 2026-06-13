@@ -56,10 +56,10 @@ export default function NanoPlayer({ song }) {
             Adjust top/left/right/height if your image has different margins. */}
         <div style={{
           position: 'absolute',
-          top: '6%',
-          left: '20.5%',
+          top: '7.5%',
+          left: '20%',
           right: '18.5%',
-          height: '28%',
+          height: '30%',
           background: 'rgba(14,14,18,0.90)',
           borderRadius: 4,
           overflow: 'hidden',
