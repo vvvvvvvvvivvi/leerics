@@ -8,7 +8,7 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
         onClick={onToggle}
         aria-label={open ? '關閉目錄' : '開啟目錄'}
         aria-expanded={open}
-        className="fixed right-0 z-50 cursor-pointer select-none"
+        className="fixed left-0 z-50 cursor-pointer select-none"
         style={{
           top: '20%',
           width: 30,
@@ -17,9 +17,9 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
           backdropFilter: 'blur(2px)',
           WebkitBackdropFilter: 'blur(2px)',
           border: 'none',
-          borderRadius: '3px 0 0 3px',
-          boxShadow: '-2px 1px 6px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.50)',
-          transform: open ? 'translateX(-236px)' : 'translateX(0)',
+          borderRadius: '0 3px 3px 0',
+          boxShadow: '2px 1px 6px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.50)',
+          transform: open ? 'translateX(236px)' : 'translateX(0)',
           transition: 'transform 0.3s ease',
           display: 'flex',
           alignItems: 'center',
@@ -55,12 +55,12 @@ export default function MenuTab({ open, onToggle, onCover, onSong, activeSongId 
       <div
         role="menu"
         aria-hidden={!open}
-        className="fixed right-0 top-0 bottom-0 z-40 flex flex-col overflow-y-auto"
+        className="fixed left-0 top-0 bottom-0 z-40 flex flex-col overflow-y-auto"
         style={{
           width: 236,
           background: '#F7F4DA',
-          borderLeft: '2px solid #b090d0',
-          transform: open ? 'translateX(0)' : 'translateX(100%)',
+          borderRight: '2px solid #b090d0',
+          transform: open ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.3s ease',
           fontFamily: 'var(--font-wenkai)',
         }}

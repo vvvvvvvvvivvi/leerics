@@ -11,15 +11,21 @@ const BlankPage = forwardRef(function BlankPage({ absolutePageNum }, ref) {
   return (
     <div
       ref={ref}
-      className="w-full h-full"
-      style={{
-        backgroundColor: '#EDE8D0',
-        backgroundImage: `url("${paperSrc}")`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        border: '1px solid rgba(160,120,200,0.18)',
-      }}
-    />
+      className="relative w-full h-full overflow-hidden"
+      style={{ backgroundColor: '#EDE8D0', border: '1px solid rgba(160,120,200,0.18)' }}
+    >
+      <img
+        src={paperSrc}
+        aria-hidden="true"
+        draggable={false}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
   );
 });
 

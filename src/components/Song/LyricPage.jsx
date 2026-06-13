@@ -40,18 +40,34 @@ const LyricPage = forwardRef(function LyricPage(
       className="relative w-full h-full overflow-hidden"
       style={{
         backgroundColor: '#EDE8D0',
-        backgroundImage: [
-          // Margin rule (purple vertical line) sits on top
-          `linear-gradient(90deg, transparent ${MARGIN}px, #C4A0E4 ${MARGIN}px, #C4A0E4 ${MARGIN + 1}px, transparent ${MARGIN + 1}px)`,
-          // Scanned paper texture — different for each page side
-          `url("${paperSrc}")`,
-        ].join(', '),
-        backgroundSize: `100% 100%, cover`,
-        backgroundRepeat: 'no-repeat, no-repeat',
         border: '1px solid rgba(160,120,200,0.18)',
         fontFamily: 'var(--font-wenkai)',
       }}
     >
+      {/* Paper texture */}
+      <img
+        src={paperSrc}
+        aria-hidden="true"
+        draggable={false}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
+
+      {/* Margin rule */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', top: 0, bottom: 0,
+        left: MARGIN, width: 1,
+        background: '#C4A0E4',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }} />
+
       {/* Scanner gutter shadow — desktop only */}
       {!compact && (
         <div
