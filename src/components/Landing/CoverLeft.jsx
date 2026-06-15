@@ -55,7 +55,7 @@ const CoverLeft = forwardRef(function CoverLeft({ onStickerClick }, ref) {
       )}
 
       {/* Sticker hotspots */}
-      {songs.map((song) => (
+      {songs.filter(song => song.stickerPos).map((song) => (
         <button
           key={song.id}
           aria-label={`開啟 ${song.title}`}
