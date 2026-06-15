@@ -2,11 +2,11 @@ import { forwardRef } from 'react';
 const backImg = `${import.meta.env.BASE_URL}assets/cover/back.png`;
 
 /**
- * JiuYinGe — scanned exercise-book back cover.
+ * MultiplierTable — scanned exercise-book back cover.
  * Displays back.png (the actual scanned 九因歌 back cover) as a full-page photograph.
  * Song navigation is handled via the MenuTab and CoverLeft sticker hotspots.
  */
-const JiuYinGe = forwardRef(function JiuYinGe(_props, ref) {
+const MultiplierTable = forwardRef(function MultiplierTable(_props, ref) {
   return (
     <div
       ref={ref}
@@ -38,4 +38,4 @@ const JiuYinGe = forwardRef(function JiuYinGe(_props, ref) {
   );
 });
 
-export default JiuYinGe;
+export default MultiplierTable;

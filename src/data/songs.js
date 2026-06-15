@@ -22,10 +22,10 @@
  */
 
 export const CATEGORIES = {
-  western: '西洋流行',
-  kpop: '韓國流行',
-  japanese: '日本流行',
-  cantonese: '廣東流行',
+  western: 'Pop',
+  kpop: 'K-Pop',
+  japanese: 'J-Pop',
+  cantonese: 'Canto Pop',
 };
 
 export const songs = [

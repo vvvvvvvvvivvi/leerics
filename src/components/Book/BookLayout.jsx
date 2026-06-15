@@ -3,7 +3,7 @@ import HTMLFlipBook from 'react-pageflip';
 import { songs } from '../../data/songs';
 import MenuTab from './MenuTab';
 import CoverLeft from '../Landing/CoverLeft';
-import JiuYinGe from '../Landing/JiuYinGe';
+import MultiplierTable from '../Landing/MultiplierTable';
 import SongSpread from '../Song/SongSpread';
 import BlankPage from '../Song/BlankPage';
 import NanoPlayer from '../Song/NanoPlayer';
@@ -163,7 +163,7 @@ export default function BookLayout() {
   //    references when only UI state (menuOpen, activeSongId) changes.
   const desktopPages = useMemo(() => [
     <CoverLeft key="cover-left" onStickerClick={goToSong} />,
-    <JiuYinGe  key="jiuyinge" />,
+    <MultiplierTable key="multipliertable" />,
     ...desktopSongs.flatMap((song, si) => {
       const songPages = song.pages.map((_, pi) => (
         <SongSpread
