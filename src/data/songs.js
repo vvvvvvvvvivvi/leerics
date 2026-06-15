@@ -763,7 +763,7 @@ export const songs = [
 
   {
     id: 'gethimback',
-    title: "反枱",
+    title: "get him back!",
     originalTitle: "get him back!",
     originalArtist: "Olivia Rodrigo",
     youtubeId: 'i_GA5GFAyKE',
@@ -1169,9 +1169,9 @@ export const songs = [
 
   {
     id: 'housetour',
-    title: "參觀",
+    title: "House Tour",
     originalTitle: "House Tour",
-    originalArtist: "",
+    originalArtist: "Sabrina Carpenter",
     youtubeId: 'rt_z10mb_k0',
     pages: [
       [
@@ -2214,7 +2214,7 @@ export const songs = [
     id: '15minutes',
     title: "15 Minutes",
     originalTitle: "15 Minutes",
-    originalArtist: "",
+    originalArtist: "Sabrina Carpenter",
     youtubeId: 'EfhemiNrg4E',
     pages: [
       [
