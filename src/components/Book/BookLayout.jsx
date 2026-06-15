@@ -54,18 +54,17 @@ export default function BookLayout() {
   const mobileFirstCap = Math.max(4, Math.floor((vh - COMPACT_FIRST_HEADER_H - COMPACT_BOTTOM) / MOBILE_RHYTHM));
   const mobileContCap  = Math.max(4, Math.floor((vh - COMPACT_CONT_HEADER_H  - COMPACT_BOTTOM) / MOBILE_RHYTHM));
 
-  const mobileSongs = songs.map(song => ({
+  const mobileSongs = useMemo(() => songs.map(song => ({
     ...song,
     pages: splitSongPages(song, mobileFirstCap, mobileContCap),
-  }));
+  })), [mobileFirstCap, mobileContCap]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const mobileOffsets = [];
-  let mobileOffset = 1;
-  mobileSongs.forEach(song => {
-    mobileOffsets.push(mobileOffset);
-    mobileOffset += song.pages.length;
-  });
-  const totalMobilePages = mobileOffset;
+  const { mobileOffsets, totalMobilePages } = useMemo(() => {
+    const offsets = [];
+    let offset = 1;
+    mobileSongs.forEach(song => { offsets.push(offset); offset += song.pages.length; });
+    return { mobileOffsets: offsets, totalMobilePages: offset };
+  }, [mobileSongs]);
 
   // ── Desktop pagination ───────────────────────────────────────────────────
   const desktopFirstCap = Math.max(4, Math.floor(
@@ -75,22 +74,24 @@ export default function BookLayout() {
     (desktopBookH - DESKTOP_CONT_HEADER_H - DESKTOP_PLAYBAR_RESERVE) / DESKTOP_RHYTHM
   ));
 
-  const desktopSongs = songs.map(song => ({
+  const desktopSongs = useMemo(() => songs.map(song => ({
     ...song,
     pages: splitSongPages(song, desktopFirstCap, desktopContCap),
-  }));
+  })), [desktopFirstCap, desktopContCap]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Each song must start on an even absolute page (left page of a spread).
   // Insert a blank page after any song whose page count is odd so the next
   // song always starts on a left page — prevents two songs sharing one spread.
-  const desktopOffsets = [];
-  let desktopOffset = 2; // 0=cover, 1=jiuyinge
-  desktopSongs.forEach(song => {
-    desktopOffsets.push(desktopOffset);
-    desktopOffset += song.pages.length;
-    if (song.pages.length % 2 !== 0) desktopOffset += 1; // blank page gap
-  });
-  const totalDesktopPages = desktopOffset;
+  const { desktopOffsets, totalDesktopPages } = useMemo(() => {
+    const offsets = [];
+    let offset = 2; // 0=cover, 1=multipliertable
+    desktopSongs.forEach(song => {
+      offsets.push(offset);
+      offset += song.pages.length;
+      if (song.pages.length % 2 !== 0) offset += 1;
+    });
+    return { desktopOffsets: offsets, totalDesktopPages: offset };
+  }, [desktopSongs]);
 
   const mobileOffsetsRef  = useRef(mobileOffsets);  mobileOffsetsRef.current  = mobileOffsets;
   const desktopOffsetsRef = useRef(desktopOffsets); desktopOffsetsRef.current = desktopOffsets;
