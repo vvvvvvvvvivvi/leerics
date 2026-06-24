@@ -1,3 +1,7 @@
+Lyrics by myself, github page writen with Claude Code and designed by myself (inspired by HK aesthetics!)
+https://vvvvvvvvvivvi.github.io/leerics/
+A project to convert my earlier pdf portfolio into a web app!
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
